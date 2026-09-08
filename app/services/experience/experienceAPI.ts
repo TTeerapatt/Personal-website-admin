@@ -1,7 +1,7 @@
 import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
-export type MediaType = "image" | "video" | "icon";
+export type MediaType = "image" | "video";
 
 export type ExperienceItem = {
   id: number;

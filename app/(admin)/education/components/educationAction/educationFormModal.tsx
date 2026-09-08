@@ -47,7 +47,7 @@ const emptyForm = (): FormState => ({
   is_active: true,
 });
 
-const MEDIA_OPTIONS: MediaType[] = ["image", "video", "icon"];
+const MEDIA_OPTIONS: MediaType[] = ["image", "video"];
 
 function toDateInput(value: string | null | undefined): string {
   if (!value) return "";

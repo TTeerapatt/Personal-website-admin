@@ -1,13 +1,13 @@
 import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
-export type MediaType = "image" | "video" | "icon";
+export type MediaType = "image" | "video";
 export type HomeBannerMediaType = "image" | "video";
 
 export type HomeBannerItem = {
   id: number;
   name: string;
-  media_type: HomeBannerMediaType | MediaType;
+  media_type: HomeBannerMediaType;
   url: string;
   display_order: number;
   is_active: boolean;

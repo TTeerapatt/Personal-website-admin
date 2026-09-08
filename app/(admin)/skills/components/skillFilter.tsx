@@ -46,7 +46,7 @@ export default function SkillFilter({
                 type="text"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search by name or category"
+                placeholder="Search by name"
                 className={`${filterInputClass} pl-10`}
               />
             </div>

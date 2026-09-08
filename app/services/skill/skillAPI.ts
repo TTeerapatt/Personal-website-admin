@@ -1,13 +1,12 @@
 import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
-export type MediaType = "image" | "video" | "icon";
+export type SkillMediaType = "image";
 
 export type SkillItem = {
   id: number;
   name: string;
-  category: string;
-  media_type: MediaType;
+  media_type: SkillMediaType | string;
   url: string;
   display_order: number;
   is_active: boolean;
@@ -17,17 +16,14 @@ export type SkillItem = {
 
 export type CreateSkillPayload = {
   name: string;
-  category: string;
-  media_type: MediaType;
+  media_type?: SkillMediaType;
   url: string;
-  display_order?: number;
   is_active?: boolean;
 };
 
 export type UpdateSkillPayload = {
   name?: string;
-  category?: string;
-  media_type?: MediaType;
+  media_type?: SkillMediaType;
   url?: string;
   display_order?: number;
   is_active?: boolean;
@@ -35,7 +31,16 @@ export type UpdateSkillPayload = {
 
 export type SkillListParams = {
   is_active?: boolean;
-  category?: string;
+};
+
+export type UploadFileResult = {
+  url: string;
+  path: string;
+  filename: string;
+  original_name: string;
+  mime_type: string;
+  size: number;
+  max_size: number;
 };
 
 function failedResult(err: unknown, fallback: string) {
@@ -112,6 +117,25 @@ const skillAPI = {
       });
   },
 
+  reorderSkills(ordered_ids: number[]) {
+    return apiServices
+      .put(
+        `skills/reorder`,
+        { ordered_ids },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error reorderSkills:", err);
+        return failedResult(err, "Failed to reorder Skills");
+      });
+  },
+
   patchSkillIsActive(id: string | number, is_active: boolean) {
     return apiServices
       .patch(
@@ -158,6 +182,24 @@ const skillAPI = {
       .catch((err) => {
         console.log("Error hardDeleteSkill:", err);
         return failedResult(err, "Failed to permanently delete Skill");
+      });
+  },
+
+  uploadMediaFile(file: File, folder = "skills") {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiServices
+      .post(`upload`, formData, {
+        params: { folder },
+        headers: {
+          Accept: "application/json",
+        },
+      })
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error uploadMediaFile:", err);
+        return failedResult(err, "Failed to upload file");
       });
   },
 };
