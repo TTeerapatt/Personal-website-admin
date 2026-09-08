@@ -102,7 +102,7 @@ export default function SideBar() {
               Personal Website
             </p>
             <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              Admin CMS
+              Admin
             </p>
           </div>
         </div>

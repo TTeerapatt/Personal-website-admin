@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiCode, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
 import authAPI from "@/app/services/auth/authAPI";
 import menuAPI from "@/app/services/menu/menuAPI";
 import {
@@ -199,150 +199,126 @@ export default function LoginMain() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--canvas)] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex min-h-[700px] w-full max-w-[980px] overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_48px_rgba(11,31,58,0.12)]">
-        {/* Left brand panel */}
-        <div className="relative hidden w-[40%] flex-col items-center justify-between bg-[var(--brand-primary)] px-8 pb-10 pt-12 md:flex">
-          <div className="flex flex-col items-center gap-4 text-white">
-            <div className="flex h-[112px] w-[112px] items-center justify-center rounded-[28px] bg-white shadow-md">
-              <MdAdminPanelSettings className="h-16 w-16 text-[var(--brand-primary)]" />
+    <div className="flex min-h-screen w-full bg-[var(--surface)]">
+      {/* Left navy panel (~60%) — reserved for branding later */}
+      <aside
+        aria-hidden
+        className="relative hidden bg-[var(--brand-primary)] lg:block lg:w-[60%]"
+      />
+
+      {/* Right form panel (~40%) */}
+      <section className="flex w-full flex-col justify-center px-6 py-10 sm:px-10 lg:w-[40%] lg:px-10 xl:px-12">
+        <div className="mx-auto w-full max-w-[360px]">
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--brand-primary)] shadow-md">
+              <MdAdminPanelSettings className="h-6 w-6 text-white" />
             </div>
-            <div className="text-center">
-              <p className="text-[22px] font-bold tracking-tight text-white">
+            <div>
+              <p className="text-[15px] font-bold text-[var(--text-primary)]">
                 Personal Website
               </p>
-              <p className="mt-2 text-[13px] font-medium text-white/75">
-                Content management for your portfolio
+              <p className="text-[12px] text-[var(--text-secondary)]">
+                Admin
               </p>
             </div>
           </div>
 
-          <div className="w-full rounded-2xl border border-white/15 bg-white/10 px-5 py-5 text-center text-white">
-            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[var(--brand-primary)] shadow-sm">
-              <FiCode className="h-4 w-4" />
-            </div>
-            <p className="mt-3 text-[12px] font-medium text-white/70">
-              Managed by
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+              Admin
             </p>
-            <p className="mt-1 text-[15px] font-semibold tracking-wide">
-              Teerapat Sommaloun
+            <h1 className="mt-2 text-[28px] font-bold leading-tight text-[var(--text-primary)] sm:text-[32px]">
+              Welcome back
+            </h1>
+            <p className="mt-2 text-[14px] text-[var(--text-secondary)]">
+              Sign in to manage your admin portal
             </p>
-            <a
-              href="mailto:rznot778@gmail.com"
-              className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-white/75 transition hover:text-white hover:underline"
-            >
-              <FiMail className="h-3.5 w-3.5" />
-              rznot778@gmail.com
-            </a>
           </div>
-        </div>
 
-        {/* Right form panel */}
-        <div className="flex w-full flex-col items-center justify-center px-8 py-12 sm:px-12 md:w-[60%] md:px-16 md:py-14">
-          <div className="w-full max-w-[430px]">
-            <div className="mb-8 flex justify-center md:hidden">
-              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-2xl bg-[var(--brand-primary)] shadow-md">
-                <MdAdminPanelSettings className="h-10 w-10 text-white" />
-              </div>
-            </div>
-
-            <div className="text-center">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">
-                Admin CMS
-              </p>
-              <h1 className="mt-2 text-center text-[30px] font-bold leading-tight text-[var(--text-primary)] sm:text-[34px]">
-                Welcome back
-              </h1>
-              <p className="mt-3 text-[14px] text-[var(--text-secondary)]">
-                Sign in to manage your personal website content
-              </p>
-            </div>
-
-            <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-[14px] font-semibold text-[var(--text-primary)]"
-                >
-                  Email address
-                </label>
-                <div className="relative">
-                  <FiMail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="rznot778@gmail.com"
-                    className="h-12 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] px-4 pl-11 text-[14px] text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-[14px] font-semibold text-[var(--text-primary)]"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <FiLock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="h-12 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] px-4 pl-11 pr-11 text-[14px] text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute inset-y-0 right-0 z-10 flex items-center pr-3.5 text-[var(--text-muted)] transition hover:text-[var(--text-primary)]"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    aria-pressed={showPassword}
-                  >
-                    {showPassword ? (
-                      <FiEyeOff className="h-5 w-5" aria-hidden />
-                    ) : (
-                      <FiEye className="h-5 w-5" aria-hidden />
-                    )}
-                  </button>
-                </div>
-                <div className="mt-2 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      popup.info(
-                        "Forgot password",
-                        "Please contact the owner to reset your password"
-                      )
-                    }
-                    className="cursor-pointer text-[13px] font-medium text-[var(--text-primary)] hover:underline"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-[var(--brand-primary)] text-[15px] font-semibold text-white transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/40 disabled:cursor-not-allowed disabled:opacity-60"
+          <form className="mt-9 space-y-5" onSubmit={handleSubmit}>
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-[14px] font-semibold text-[var(--text-primary)]"
               >
-                {isSubmitting ? "Signing in..." : "Sign in"}
-              </button>
-            </form>
-          </div>
+                Email address
+              </label>
+              <div className="relative">
+                <FiMail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="h-12 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] px-4 pl-11 text-[14px] text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block text-[14px] font-semibold text-[var(--text-primary)]"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <FiLock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)]" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="h-12 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] px-4 pl-11 pr-11 text-[14px] text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 z-10 flex items-center pr-3.5 text-[var(--text-muted)] transition hover:text-[var(--text-primary)]"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? (
+                    <FiEyeOff className="h-5 w-5" aria-hidden />
+                  ) : (
+                    <FiEye className="h-5 w-5" aria-hidden />
+                  )}
+                </button>
+              </div>
+              <div className="mt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() =>
+                    popup.info(
+                      "Forgot password",
+                      "Please contact the owner to reset your password"
+                    )
+                  }
+                  className="cursor-pointer text-[13px] font-medium text-[var(--text-primary)] hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-[var(--brand-primary)] text-[15px] font-semibold text-white transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/40 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
