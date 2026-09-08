@@ -2,11 +2,12 @@ import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
 export type MediaType = "image" | "video" | "icon";
+export type HomeBannerMediaType = "image" | "video";
 
 export type HomeBannerItem = {
   id: number;
   name: string;
-  media_type: MediaType;
+  media_type: HomeBannerMediaType | MediaType;
   url: string;
   display_order: number;
   is_active: boolean;
@@ -16,15 +17,14 @@ export type HomeBannerItem = {
 
 export type CreateHomeBannerPayload = {
   name: string;
-  media_type: MediaType;
+  media_type: HomeBannerMediaType;
   url: string;
-  display_order?: number;
   is_active?: boolean;
 };
 
 export type UpdateHomeBannerPayload = {
   name?: string;
-  media_type?: MediaType;
+  media_type?: HomeBannerMediaType;
   url?: string;
   display_order?: number;
   is_active?: boolean;
@@ -32,6 +32,16 @@ export type UpdateHomeBannerPayload = {
 
 export type HomeBannerListParams = {
   is_active?: boolean;
+};
+
+export type UploadFileResult = {
+  url: string;
+  path: string;
+  filename: string;
+  original_name: string;
+  mime_type: string;
+  size: number;
+  max_size: number;
 };
 
 function failedResult(err: unknown, fallback: string) {
@@ -108,6 +118,25 @@ const homeBannerAPI = {
       });
   },
 
+  reorderHomeBanners(ordered_ids: number[]) {
+    return apiServices
+      .put(
+        `home-banners/reorder`,
+        { ordered_ids },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error reorderHomeBanners:", err);
+        return failedResult(err, "Failed to reorder Home Banners");
+      });
+  },
+
   patchHomeBannerIsActive(id: string | number, is_active: boolean) {
     return apiServices
       .patch(
@@ -154,6 +183,24 @@ const homeBannerAPI = {
       .catch((err) => {
         console.log("Error hardDeleteHomeBanner:", err);
         return failedResult(err, "Failed to permanently delete Home Banner");
+      });
+  },
+
+  uploadMediaFile(file: File, folder = "home-banners") {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiServices
+      .post(`upload`, formData, {
+        params: { folder },
+        headers: {
+          Accept: "application/json",
+        },
+      })
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error uploadMediaFile:", err);
+        return failedResult(err, "Failed to upload file");
       });
   },
 };
