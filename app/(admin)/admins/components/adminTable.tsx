@@ -16,9 +16,13 @@ type AdminTableProps = {
 function formatDateTime(value: string | null): string {
   if (!value) return "-";
   try {
-    return new Intl.DateTimeFormat("th-TH", {
-      dateStyle: "medium",
-      timeStyle: "short",
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     }).format(new Date(value));
   } catch {
     return "-";

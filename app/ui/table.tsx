@@ -107,7 +107,7 @@ export default function DataTable<T>({
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
             <thead>
-              <tr className="bg-[var(--surface-raised)]">
+              <tr className="bg-[var(--brand-primary)]">
                 {columns.map((column) => (
                   <th
                     key={column.key}
@@ -140,7 +140,7 @@ export default function DataTable<T>({
       )}
 
       {!loading && data.length > 0 ? (
-        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border)] px-5 py-3.5 text-[13px] text-[var(--text-secondary)]">
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border)] bg-[var(--surface)] px-5 py-3.5 text-[13px] text-[var(--text-secondary)]">
           <div className="relative">
             <select
               value={pageSize}
@@ -149,7 +149,7 @@ export default function DataTable<T>({
                 setCurrentPage(1);
               }}
               aria-label="Rows per page"
-              className="h-9 cursor-pointer appearance-none rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] py-1 pl-3 pr-9 font-semibold text-[var(--text-primary)] outline-none transition focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15"
+              className="h-9 cursor-pointer appearance-none rounded-lg border border-[var(--brand-primary)] bg-[var(--brand-primary)] py-1 pl-3 pr-9 font-semibold text-white outline-none transition hover:brightness-110 focus:ring-2 focus:ring-[var(--brand-primary)]/30"
             >
               {PAGE_SIZE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -157,7 +157,7 @@ export default function DataTable<T>({
                 </option>
               ))}
             </select>
-            <FiChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-primary)]" />
+            <FiChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white" />
           </div>
 
           <button
@@ -166,7 +166,7 @@ export default function DataTable<T>({
             disabled={activePage === 1}
             aria-label="Previous page"
             title="Previous page"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text-primary)] transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <FiChevronLeft className="h-4 w-4" />
           </button>
@@ -183,7 +183,7 @@ export default function DataTable<T>({
             disabled={activePage === totalPages}
             aria-label="Next page"
             title="Next page"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--text-primary)] transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <FiChevronRight className="h-4 w-4" />
           </button>

@@ -27,26 +27,30 @@ export function AdminFormStepper({
         const isDone = currentStep > step.id;
         const isActive = currentStep === step.id;
         const isLast = index === steps.length - 1;
+        const connectorDone = currentStep > step.id;
 
         return (
           <div key={step.id} className="relative flex flex-1 flex-col items-center">
             {!isLast ? (
               <div
                 className={`absolute left-[calc(50%+18px)] right-[calc(-50%+18px)] top-4 h-[2px] ${
-                  isDone || currentStep > step.id
-                    ? "bg-[var(--surface-raised)]"
+                  connectorDone
+                    ? "bg-[var(--brand-primary)]"
                     : "bg-[var(--surface-soft)]"
                 }`}
               />
             ) : null}
             <div
               className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold ${
-                isDone || isActive
-                  ? "bg-[var(--surface-raised)] text-white"
-                  : "bg-[var(--surface-soft)] text-[var(--text-muted)]"
+                isDone
+                  ? "bg-[var(--brand-primary)] text-white"
+                  : isActive
+                    ? "bg-[var(--brand-primary)] text-white ring-4 ring-[var(--brand-primary)]/15"
+                    : "bg-[var(--surface-soft)] text-[var(--text-muted)]"
               }`}
+              aria-current={isActive ? "step" : undefined}
             >
-              {isDone ? <FiCheck className="h-4 w-4" /> : step.id}
+              {isDone ? <FiCheck className="h-4 w-4" strokeWidth={2.5} /> : step.id}
             </div>
             <p
               className={`mt-2 text-center text-[12px] font-semibold ${
@@ -156,7 +160,7 @@ export function AdminPermissionTable({
     <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
       <table className="min-w-full border-collapse">
         <thead>
-          <tr className="bg-[var(--surface)] text-left text-[12px] font-semibold text-[var(--text-secondary)]">
+          <tr className="bg-[var(--brand-primary)] text-left text-[12px] font-semibold text-white">
             <th className="px-4 py-3">Category / System menu</th>
             {actionColumns.map((code) => (
               <th key={code} className="px-3 py-3 text-center capitalize">
