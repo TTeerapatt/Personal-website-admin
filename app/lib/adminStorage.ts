@@ -1,9 +1,15 @@
-export const ADMIN_TOKEN_KEY = "nexus_admin_token";
-export const ADMIN_PROFILE_KEY = "nexus_admin_admin";
+export const ADMIN_TOKEN_KEY = "personal_website_admin_token";
+export const ADMIN_PROFILE_KEY = "personal_website_admin_admin";
 
 /** Legacy keys — cleared on logout only; no longer written. */
-const LEGACY_PERMISSION_MENU_KEY = "nexus_admin_permission_menu";
-const LEGACY_MENU_ALL_KEY = "nexus_admin_menu_all";
+const LEGACY_KEYS = [
+  "nexus_admin_token",
+  "nexus_admin_admin",
+  "nexus_admin_permission_menu",
+  "nexus_admin_menu_all",
+  "personal_website_admin_permission_menu",
+  "personal_website_admin_menu_all",
+] as const;
 
 export type StoredAdmin = {
   id: string | number;
@@ -76,6 +82,7 @@ export function clearAdminSession(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(ADMIN_TOKEN_KEY);
   localStorage.removeItem(ADMIN_PROFILE_KEY);
-  localStorage.removeItem(LEGACY_PERMISSION_MENU_KEY);
-  localStorage.removeItem(LEGACY_MENU_ALL_KEY);
+  for (const key of LEGACY_KEYS) {
+    localStorage.removeItem(key);
+  }
 }

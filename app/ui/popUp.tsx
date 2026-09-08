@@ -2,18 +2,18 @@
 
 import Swal, { type SweetAlertIcon, type SweetAlertResult } from "sweetalert2";
 
-const BLUE = "#5b86ff";
-const TEXT = "#f4f7fb";
-const CANCEL_BG = "#22324a";
+const NAVY = "#0b1f3a";
+const TEXT = "#0b1b34";
+const CANCEL_BG = "#e8eef6";
 
 const LAYOUT = {
   width: "360px",
   padding: "1.75rem 1.5rem 1.5rem",
-  background: "#17243a",
+  background: "#ffffff",
   color: TEXT,
-  iconColor: BLUE,
+  iconColor: NAVY,
   backdrop: `
-    rgba(15, 23, 42, 0.42)
+    rgba(11, 31, 58, 0.28)
     left top
     no-repeat
   `,
@@ -62,7 +62,7 @@ export function showStatusPopup({
     background: LAYOUT.background,
     color: LAYOUT.color,
     iconColor: LAYOUT.iconColor,
-    confirmButtonColor: BLUE,
+    confirmButtonColor: NAVY,
     backdrop: LAYOUT.backdrop,
     customClass: {
       container: "app-swal-container",
@@ -101,7 +101,7 @@ export async function showConfirmPopup({
     background: LAYOUT.background,
     color: LAYOUT.color,
     iconColor: LAYOUT.iconColor,
-    confirmButtonColor: BLUE,
+    confirmButtonColor: NAVY,
     cancelButtonColor: CANCEL_BG,
     backdrop: LAYOUT.backdrop,
     customClass: {

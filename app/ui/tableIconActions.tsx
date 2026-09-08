@@ -3,11 +3,11 @@
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 
 const BASE_BTN =
-  "inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]/40 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]/30 disabled:cursor-not-allowed disabled:opacity-40";
 
-const EDIT_BTN = `${BASE_BTN} bg-[rgba(91,134,255,0.12)] text-[#b4c8ff] ring-1 ring-[rgba(91,134,255,0.28)] hover:bg-[rgba(91,134,255,0.22)] hover:text-[#e8efff] hover:ring-[rgba(91,134,255,0.48)]`;
+const EDIT_BTN = `${BASE_BTN} bg-[rgba(11,31,58,0.08)] text-[#0b1f3a] ring-1 ring-[rgba(11,31,58,0.16)] hover:bg-[rgba(11,31,58,0.14)]`;
 
-const DELETE_BTN = `${BASE_BTN} bg-[rgba(248,113,113,0.12)] text-[#fca5a5] ring-1 ring-[rgba(248,113,113,0.28)] hover:bg-[rgba(248,113,113,0.22)] hover:text-[#fecaca] hover:ring-[rgba(248,113,113,0.48)]`;
+const DELETE_BTN = `${BASE_BTN} bg-[rgba(192,57,43,0.08)] text-[#c0392b] ring-1 ring-[rgba(192,57,43,0.18)] hover:bg-[rgba(192,57,43,0.14)]`;
 
 type TableIconActionsProps = {
   editLabel: string;

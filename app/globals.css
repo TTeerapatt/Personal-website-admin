@@ -1,88 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0d172b;
-  --foreground: #f4f7fb;
-  --brand-primary: #5b86ff;
-  --brand-secondary: #8b5cf6;
-  --canvas: #0d172b;
-  --surface: #17243a;
-  --surface-raised: #1e2d44;
-  --surface-muted: #122036;
-  --surface-soft: #22324a;
-  --border: rgba(148, 163, 184, 0.18);
-  --border-strong: rgba(148, 163, 184, 0.28);
-  --text-primary: #f4f7fb;
-  --text-secondary: #a9b6ca;
-  --text-muted: #7f8ea7;
+  --background: #f5f7fb;
+  --foreground: #0b1b34;
+  --brand-primary: #0b1f3a;
+  --brand-accent: #1e3a5f;
+  --brand-soft: #dbe4f0;
+  --canvas: #f5f7fb;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-muted: #eef2f7;
+  --surface-soft: #e8eef6;
+  --border: rgba(11, 31, 58, 0.12);
+  --border-strong: rgba(11, 31, 58, 0.22);
+  --text-primary: #0b1b34;
+  --text-secondary: #4a5d78;
+  --text-muted: #7a8ba3;
+  --danger: #c0392b;
+  --success: #1f7a4d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-noto-thai);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-noto-thai), "Noto Sans Thai", sans-serif;
 }
 
-/* Shared dark surfaces for native controls and browser-rendered states. */
 ::selection {
-  background: rgba(91, 134, 255, 0.35);
+  background: rgba(11, 31, 58, 0.18);
   color: var(--text-primary);
 }
 
 option {
-  background: var(--surface-raised);
+  background: var(--surface);
   color: var(--text-primary);
-}
-
-@keyframes ci-cd-border-run {
-  0% {
-    clip-path: inset(0 0 94% 0 round 16px);
-  }
-  25% {
-    clip-path: inset(0 0 0 94% round 16px);
-  }
-  50% {
-    clip-path: inset(94% 0 0 0 round 16px);
-  }
-  75% {
-    clip-path: inset(0 94% 0 0 round 16px);
-  }
-  100% {
-    clip-path: inset(0 0 94% 0 round 16px);
-  }
-}
-
-@keyframes ci-cd-running-ring {
-  0% {
-    opacity: 0.75;
-    transform: scale(0.92);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(1.18);
-  }
-}
-
-.ci-cd-running-card {
-  box-shadow: none !important;
-}
-
-.ci-cd-running-border {
-  border: 2px solid #2563eb;
-  animation: ci-cd-border-run 1.6s linear infinite;
-  will-change: clip-path;
-}
-
-.ci-cd-running-icon-ring {
-  animation: ci-cd-running-ring 1.8s ease-out infinite;
 }
 
 /* Hide browser native password reveal so custom toggle is the only control */
@@ -93,8 +50,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 .app-swal-popup {
-  border-radius: 24px !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px rgba(11, 31, 58, 0.16) !important;
   overflow: hidden !important;
 }
 
@@ -110,9 +67,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   left: 0 !important;
   height: 4px !important;
   overflow: hidden !important;
-  border-bottom-left-radius: 24px !important;
-  border-bottom-right-radius: 24px !important;
-  background: rgba(148, 163, 184, 0.16) !important;
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
+  background: rgba(11, 31, 58, 0.08) !important;
 }
 
 .app-swal-icon {
@@ -177,10 +134,81 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 .app-swal-confirm-btn:focus {
-  box-shadow: 0 0 0 3px rgba(91, 134, 255, 0.28) !important;
+  box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.2) !important;
 }
 
 .app-swal-cancel-btn {
   background: var(--surface-soft) !important;
   color: var(--text-primary) !important;
+}
+
+/* TipTap rich text */
+.rich-text-editor {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.rich-text-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.rich-text-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rich-text-toolbar button:hover {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.rich-text-toolbar button.is-active {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary);
+}
+
+.rich-text-editor .ProseMirror {
+  min-height: 160px;
+  padding: 0.85rem 1rem;
+  outline: none;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+.rich-text-editor .ProseMirror p {
+  margin: 0 0 0.65rem;
+}
+
+.rich-text-editor .ProseMirror ul,
+.rich-text-editor .ProseMirror ol {
+  margin: 0 0 0.65rem;
+  padding-left: 1.25rem;
+}
+
+.rich-text-editor .ProseMirror a {
+  color: var(--brand-accent);
+  text-decoration: underline;
+}
+
+.rich-text-editor .ProseMirror:focus {
+  box-shadow: inset 0 0 0 2px rgba(11, 31, 58, 0.12);
 }

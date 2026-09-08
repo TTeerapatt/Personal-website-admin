@@ -94,15 +94,15 @@ export default function SideBar() {
     <aside className="flex h-screen w-[250px] shrink-0 flex-col overflow-hidden border-r border-[var(--border)] bg-[var(--surface)]">
       <div className="flex h-[76px] shrink-0 items-center border-b border-[var(--border)] px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[var(--surface-raised)] shadow-[0_6px_14px_rgba(36,46,66,0.18)] ring-1 ring-[var(--brand-primary)]/10">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[var(--brand-primary)] shadow-[0_6px_14px_rgba(11,31,58,0.18)]">
             <MdAdminPanelSettings className="h-7 w-7 text-white" />
           </div>
           <div className="min-w-0 leading-tight">
-            <p className="text-[16px] font-extrabold tracking-[-0.01em] text-[var(--text-primary)]">
-              Nexus Admin
+            <p className="text-[15px] font-extrabold tracking-[-0.01em] text-[var(--text-primary)]">
+              Personal Website
             </p>
             <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              Admin Panel
+              Admin CMS
             </p>
           </div>
         </div>
@@ -129,13 +129,13 @@ export default function SideBar() {
                       href={href}
                       className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[14px] font-semibold transition ${
                         isActive
-                          ? "bg-[rgba(91,134,255,0.16)] text-[#b4c8ff] shadow-sm ring-1 ring-[rgba(91,134,255,0.32)]"
+                          ? "bg-[var(--brand-primary)] text-white shadow-sm"
                           : "text-[var(--text-secondary)] hover:bg-[var(--surface-soft)] hover:text-[var(--text-primary)]"
                       }`}
                     >
                       <Icon
                         className={`h-5 w-5 shrink-0 ${
-                          isActive ? "text-[#b4c8ff]" : "text-[var(--text-muted)]"
+                          isActive ? "text-white" : "text-[var(--text-muted)]"
                         }`}
                       />
                       <span>{tab.name}</span>
@@ -157,13 +157,13 @@ export default function SideBar() {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[14px] font-semibold transition ${
                     isActive
-                      ? "bg-[rgba(91,134,255,0.16)] text-[#b4c8ff] shadow-sm ring-1 ring-[rgba(91,134,255,0.32)]"
+                      ? "bg-[var(--brand-primary)] text-white shadow-sm"
                       : "text-[var(--text-secondary)] hover:bg-[var(--surface-soft)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <Icon
                     className={`h-5 w-5 shrink-0 ${
-                      isActive ? "text-[#b4c8ff]" : "text-[var(--text-muted)]"
+                      isActive ? "text-white" : "text-[var(--text-muted)]"
                     }`}
                   />
                   <span>{item.label}</span>
@@ -175,7 +175,7 @@ export default function SideBar() {
       <div className="shrink-0 border-t border-[var(--border)] p-2.5">
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-2.5">
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-raised)] text-[12px] font-bold text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--brand-primary)] text-[12px] font-bold text-white">
               {(admin?.display_name || "Admin")
                 .split(/[\s_]+/)
                 .filter(Boolean)

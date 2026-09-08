@@ -31,8 +31,8 @@ function normalizeAppPath(path: string): string {
 }
 
 /**
- * usePathname() omits Next.js basePath (e.g. "/vps"),
- * while DOM <a href> includes it (e.g. "/nexus/vps").
+ * usePathname() omits Next.js basePath (e.g. "/projects"),
+ * while DOM <a href> includes it (e.g. "/personal-website-admin/projects").
  * Strip basePath before comparing so same-tab clicks don't stick loading.
  */
 function toAppPath(pathnameFromHref: string, routerPathname: string): string {

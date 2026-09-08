@@ -10,7 +10,7 @@ function isSupportedLocale(value: string | undefined): value is SupportedLocale 
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get("nexus_admin_locale")?.value;
+  const cookieLocale = cookieStore.get("personal_website_admin_locale")?.value;
   const requestedLocale = await requestLocale;
 
   const locale = isSupportedLocale(requestedLocale)

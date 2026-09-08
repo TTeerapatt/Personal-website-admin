@@ -1,43 +1,47 @@
 import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
-export type ProjectType = "project" | "service";
-
 export type ProjectItem = {
   id: number;
-  name: string;
-  description: string | null;
-  type: ProjectType;
-  resource_type_id: number;
-  resource_type_code: string;
-  resource_type_name: string;
+  name_th: string;
+  name_en: string;
+  description_th: string | null;
+  description_en: string | null;
+  thumbnail_url: string | null;
+  github_url: string | null;
+  demo_url: string | null;
+  display_order: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 };
 
 export type CreateProjectPayload = {
-  name: string;
-  description?: string | null;
-  type: ProjectType;
-  resource_type_id: number;
+  name_th: string;
+  name_en: string;
+  description_th?: string | null;
+  description_en?: string | null;
+  thumbnail_url?: string | null;
+  github_url?: string | null;
+  demo_url?: string | null;
+  display_order?: number;
   is_active?: boolean;
 };
 
 export type UpdateProjectPayload = {
-  name?: string;
-  description?: string | null;
-  type?: ProjectType;
-  resource_type_id?: number;
+  name_th?: string;
+  name_en?: string;
+  description_th?: string | null;
+  description_en?: string | null;
+  thumbnail_url?: string | null;
+  github_url?: string | null;
+  demo_url?: string | null;
+  display_order?: number;
   is_active?: boolean;
 };
 
 export type ProjectListParams = {
   is_active?: boolean;
-  name?: string;
-  type?: ProjectType;
-  resource_type_id?: number;
-  resource_type_code?: string;
 };
 
 function failedResult(err: unknown, fallback: string) {
@@ -80,7 +84,7 @@ const projectAPI = {
       .then((res) => validateOrThrowApiResponse(res))
       .catch((err) => {
         console.log("Error getProjectById:", err);
-        return failedResult(err, "Failed to fetch Projects");
+        return failedResult(err, "Failed to fetch Project");
       });
   },
 

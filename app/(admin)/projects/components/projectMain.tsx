@@ -1,18 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import projectAPI, { type ProjectItem } from "@/app/services/project/projectAPI";
-import resourceTypeAPI, {
-  type ResourceTypeItem,
-} from "@/app/services/resourceType/resourceTypeAPI";
+import projectAPI, {
+  type ProjectItem,
+} from "@/app/services/project/projectAPI";
 import { popup } from "@/app/ui/popUp";
 import { useLoading } from "@/app/providers/LoadingProvider";
 import { useTabPermission } from "@/app/hooks/useTabPermission";
+import ProjectFormModal from "./projectAction/projectFormModal";
 import ProjectFilter from "./projectFilter";
 import ProjectTable from "./projectTable";
-import ProjectFormModal from "./projectAction/projectFormModal";
 
-type ProjectListApiResult =
+type ListApiResult =
   | {
       success?: boolean;
       data?: ProjectItem[];
@@ -23,172 +22,100 @@ type ProjectListApiResult =
   | null
   | undefined;
 
-type ResourceTypeListApiResult =
-  | {
-      success?: boolean;
-      data?: ResourceTypeItem[];
-      status?: string;
-      errMessage?: string;
-      message?: string;
-    }
-  | null
-  | undefined;
-
 export default function ProjectMain() {
   const { withLoading } = useLoading();
   const { canAdd, canEdit, canDelete } = useTabPermission("projects");
-  const [projects, setProjects] = useState<ProjectItem[]>([]);
-  const [resourceTypes, setResourceTypes] = useState<ResourceTypeItem[]>([]);
+  const [items, setItems] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [projectType, setProjectType] = useState("");
-  const [resourceTypeId, setResourceTypeId] = useState("");
+  const [isActive, setIsActive] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<ProjectItem | null>(
-    null
-  );
-  const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  const fetchProjects = useCallback(async () => {
+  const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const result = (await projectAPI.getProjectAll()) as ProjectListApiResult;
+      const result = (await projectAPI.getProjectAll()) as ListApiResult;
 
       if (!result || result.status === "failed" || result.success === false) {
-        const message =
-          result?.errMessage ||
-          result?.message ||
-          "Unable to fetch Projects";
-        await popup.error("Error", message);
-        setProjects([]);
+        await popup.error(
+          "Error",
+          result?.errMessage || result?.message || "Unable to fetch projects"
+        );
+        setItems([]);
         return;
       }
 
-      setProjects(Array.isArray(result.data) ? result.data : []);
+      setItems(Array.isArray(result.data) ? result.data : []);
     } catch {
-      await popup.error("Error", "Unable to fetch Projects");
-      setProjects([]);
+      await popup.error("Error", "Unable to fetch projects");
+      setItems([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const fetchResourceTypes = useCallback(async () => {
-    try {
-      const result =
-        (await resourceTypeAPI.getResourceTypeAll()) as ResourceTypeListApiResult;
-
-      if (!result || result.status === "failed" || result.success === false) {
-        setResourceTypes([]);
-        return;
-      }
-
-      setResourceTypes(Array.isArray(result.data) ? result.data : []);
-    } catch {
-      setResourceTypes([]);
-    }
-  }, []);
-
   useEffect(() => {
-    void fetchProjects();
-    void fetchResourceTypes();
-  }, [fetchProjects, fetchResourceTypes]);
+    void fetchItems();
+  }, [fetchItems]);
 
-  const filteredProjects = useMemo(() => {
+  const filteredItems = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    const statusFilter = status.trim().toLowerCase();
-    const kindFilter = projectType.trim().toLowerCase();
-    const typeFilter = resourceTypeId.trim();
 
-    return projects.filter((project) => {
-      const matchesStatus =
-        !statusFilter ||
-        (statusFilter === "active" && project.is_active) ||
-        (statusFilter === "inactive" && !project.is_active);
+    return items.filter((item) => {
+      const matchesActive =
+        !isActive ||
+        (isActive === "true" ? item.is_active : !item.is_active);
 
-      const matchesKind =
-        !kindFilter ||
-        String(project.type || "").trim().toLowerCase() === kindFilter;
+      if (!keyword) return matchesActive;
 
-      const matchesType =
-        !typeFilter || String(project.resource_type_id) === typeFilter;
-
-      if (!keyword) return matchesStatus && matchesKind && matchesType;
-
-      const name = String(project.name || "").toLowerCase();
-      const description = String(project.description || "").toLowerCase();
-      const typeName = String(project.resource_type_name || "").toLowerCase();
-      const kind = String(project.type || "").toLowerCase();
+      const nameTh = String(item.name_th || "").toLowerCase();
+      const nameEn = String(item.name_en || "").toLowerCase();
       const matchesSearch =
-        name.includes(keyword) ||
-        description.includes(keyword) ||
-        typeName.includes(keyword) ||
-        kind.includes(keyword);
+        nameTh.includes(keyword) || nameEn.includes(keyword);
 
-      return matchesStatus && matchesKind && matchesType && matchesSearch;
+      return matchesActive && matchesSearch;
     });
-  }, [projectType, projects, resourceTypeId, search, status]);
+  }, [items, isActive, search]);
 
-  const handleClearFilter = () => {
-    setSearch("");
-    setStatus("");
-    setProjectType("");
-    setResourceTypeId("");
-  };
-
-  const handleToggleActive = async (project: ProjectItem) => {
-    const nextActive = !project.is_active;
-    setTogglingId(project.id);
-
-    try {
+  const handleToggleActive = async (item: ProjectItem) => {
+    let updated = false;
+    await withLoading(async () => {
       const result = (await projectAPI.patchProjectIsActive(
-        project.id,
-        nextActive
+        item.id,
+        !item.is_active
       )) as {
         success?: boolean;
         status?: string;
-        data?: ProjectItem;
         errMessage?: string;
         message?: string;
       };
 
       if (!result || result.status === "failed" || result.success === false) {
         await popup.error(
-          "Status update failed",
-          result?.errMessage ||
-            result?.message ||
-            "Unable to update Project status"
+          "Update failed",
+          result?.errMessage || result?.message || "Unable to update status"
         );
         return;
       }
+      updated = true;
+    }, "Updating status...");
 
-      const updated = result.data;
-      setProjects((prev) =>
-        prev.map((item) =>
-          item.id === project.id
-            ? updated
-              ? updated
-              : { ...item, is_active: nextActive }
-            : item
-        )
-      );
-    } finally {
-      setTogglingId(null);
-    }
+    if (!updated) return;
+    void fetchItems();
+    await popup.success("Updated", "Status updated successfully");
   };
 
-  const handleDeleteProject = async (project: ProjectItem) => {
+  const handleDelete = async (item: ProjectItem) => {
     const confirmed = await popup.confirmDelete({
-      title: "Delete this Project?",
-      text: `Delete ${project.name}?`,
+      title: "Delete this project?",
+      text: `Delete ${item.name_en}?`,
     });
     if (!confirmed) return;
 
     let deleted = false;
-
     await withLoading(async () => {
-      const result = (await projectAPI.softDeleteProject(project.id)) as {
+      const result = (await projectAPI.softDeleteProject(item.id)) as {
         success?: boolean;
         status?: string;
         errMessage?: string;
@@ -198,17 +125,15 @@ export default function ProjectMain() {
       if (!result || result.status === "failed" || result.success === false) {
         await popup.error(
           "Delete failed",
-          result?.errMessage || result?.message || "Unable to delete Project"
+          result?.errMessage || result?.message || "Unable to delete project"
         );
         return;
       }
-
       deleted = true;
-    }, "Deleting Project...");
+    }, "Deleting project...");
 
     if (!deleted) return;
-
-    void fetchProjects();
+    void fetchItems();
     await popup.success("Deleted successfully", "Project deleted successfully");
   };
 
@@ -216,50 +141,43 @@ export default function ProjectMain() {
     <div className="space-y-5">
       <ProjectFilter
         search={search}
-        status={status}
-        projectType={projectType}
-        resourceTypeId={resourceTypeId}
-        resourceTypes={resourceTypes}
+        isActive={isActive}
         onSearchChange={setSearch}
-        onStatusChange={setStatus}
-        onProjectTypeChange={setProjectType}
-        onResourceTypeChange={setResourceTypeId}
-        onClear={handleClearFilter}
+        onIsActiveChange={setIsActive}
+        onClear={() => {
+          setSearch("");
+          setIsActive("");
+        }}
         onAdd={canAdd ? () => setCreateOpen(true) : undefined}
       />
 
       <ProjectTable
-        projects={filteredProjects}
+        items={filteredItems}
         loading={loading}
-        togglingId={togglingId}
-        onEdit={canEdit ? setEditingProject : undefined}
-        onDelete={
-          canDelete ? (project) => void handleDeleteProject(project) : undefined
-        }
+        onEdit={canEdit ? (item) => setEditingId(item.id) : undefined}
+        onDelete={canDelete ? (item) => void handleDelete(item) : undefined}
         onToggleActive={
-          canEdit ? (project) => void handleToggleActive(project) : undefined
+          canEdit ? (item) => void handleToggleActive(item) : undefined
         }
       />
 
       {canAdd ? (
         <ProjectFormModal
           open={createOpen}
-          resourceTypes={resourceTypes}
           onClose={() => setCreateOpen(false)}
           onSaved={() => {
-            void fetchProjects();
+            void fetchItems();
           }}
         />
       ) : null}
 
       {canEdit ? (
         <ProjectFormModal
-          open={editingProject != null}
-          project={editingProject}
-          resourceTypes={resourceTypes}
-          onClose={() => setEditingProject(null)}
+          open={editingId != null}
+          itemId={editingId}
+          onClose={() => setEditingId(null)}
           onSaved={() => {
-            void fetchProjects();
+            void fetchItems();
           }}
         />
       ) : null}

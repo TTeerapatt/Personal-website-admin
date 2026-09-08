@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiCode, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
-import { MdCloud } from "react-icons/md";
 import authAPI from "@/app/services/auth/authAPI";
 import menuAPI from "@/app/services/menu/menuAPI";
 import {
@@ -13,8 +12,8 @@ import {
   type StoredMenuAll,
   type StoredPermissionMenu,
 } from "@/app/lib/adminStorage";
-import { popup } from "@/app/ui/popUp"
-import { MdAdminPanelSettings } from "react-icons/md";;
+import { popup } from "@/app/ui/popUp";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 type LoginApiResult =
   | {
@@ -200,41 +199,37 @@ export default function LoginMain() {
   };
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center bg-[var(--surface-raised)] px-4 py-8 sm:px-6 lg:px-8"
-    >
-      <div className="flex min-h-[700px] w-full max-w-[980px] overflow-hidden rounded-[32px] border border-white/10 bg-[var(--surface)] shadow-[0_20px_60px_rgba(36,46,66,0.28)]">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--canvas)] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flex min-h-[700px] w-full max-w-[980px] overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_48px_rgba(11,31,58,0.12)]">
         {/* Left brand panel */}
-        <div
-          className="relative hidden w-[40%] flex-col items-center justify-between border-r border-white/10 bg-[var(--surface-raised)] px-8 pb-10 pt-12 md:flex"
-        >
+        <div className="relative hidden w-[40%] flex-col items-center justify-between bg-[var(--brand-primary)] px-8 pb-10 pt-12 md:flex">
           <div className="flex flex-col items-center gap-4 text-white">
-            <div className="flex h-[112px] w-[112px] items-center justify-center rounded-[28px] bg-[var(--surface)] shadow-md">
-              <MdAdminPanelSettings className="h-16 w-16 text-[var(--text-primary)]" />
+            <div className="flex h-[112px] w-[112px] items-center justify-center rounded-[28px] bg-white shadow-md">
+              <MdAdminPanelSettings className="h-16 w-16 text-[var(--brand-primary)]" />
             </div>
             <div className="text-center">
-              <p className="text-[24px] font-bold uppercase tracking-[0.18em]">
-                Nexus
+              <p className="text-[22px] font-bold tracking-tight text-white">
+                Personal Website
               </p>
-              <p className="mt-2 text-[13px] font-medium text-white/70">
-                Server management system
+              <p className="mt-2 text-[13px] font-medium text-white/75">
+                Content management for your portfolio
               </p>
             </div>
           </div>
 
-          <div className="w-full rounded-2xl border border-white/15 bg-[var(--surface)]/10 px-5 py-5 text-center text-white">
-            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--text-primary)] shadow-sm">
+          <div className="w-full rounded-2xl border border-white/15 bg-white/10 px-5 py-5 text-center text-white">
+            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[var(--brand-primary)] shadow-sm">
               <FiCode className="h-4 w-4" />
             </div>
-            <p className="mt-3 text-[12px] font-medium text-white/65">
-              Nexus system was created by
+            <p className="mt-3 text-[12px] font-medium text-white/70">
+              Managed by
             </p>
             <p className="mt-1 text-[15px] font-semibold tracking-wide">
               Teerapat Sommaloun
             </p>
             <a
               href="mailto:rznot778@gmail.com"
-              className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-white/70 transition hover:text-white hover:underline"
+              className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-white/75 transition hover:text-white hover:underline"
             >
               <FiMail className="h-3.5 w-3.5" />
               rznot778@gmail.com
@@ -246,20 +241,20 @@ export default function LoginMain() {
         <div className="flex w-full flex-col items-center justify-center px-8 py-12 sm:px-12 md:w-[60%] md:px-16 md:py-14">
           <div className="w-full max-w-[430px]">
             <div className="mb-8 flex justify-center md:hidden">
-              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-2xl bg-[var(--surface-raised)] shadow-md">
-                <MdCloud className="h-10 w-10 text-white" />
+              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-2xl bg-[var(--brand-primary)] shadow-md">
+                <MdAdminPanelSettings className="h-10 w-10 text-white" />
               </div>
             </div>
 
             <div className="text-center">
               <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">
-                Nexus admin
+                Admin CMS
               </p>
               <h1 className="mt-2 text-center text-[30px] font-bold leading-tight text-[var(--text-primary)] sm:text-[34px]">
                 Welcome back
               </h1>
               <p className="mt-3 text-[14px] text-[var(--text-secondary)]">
-                Sign in to continue to your workspace
+                Sign in to manage your personal website content
               </p>
             </div>
 
@@ -281,7 +276,7 @@ export default function LoginMain() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@nexus.com"
+                    placeholder="rznot778@gmail.com"
                     className="h-12 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] px-4 pl-11 text-[14px] text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15"
                   />
                 </div>

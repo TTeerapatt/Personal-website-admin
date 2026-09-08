@@ -4,21 +4,44 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# AGENTS.md — Baan Laundry Admin
+# AGENTS.md — Personal Website Admin (CMS)
 
 แนวทางสำหรับ AI agent / คนที่มาแก้โค้ดหรือ prompt ต่อในโปรเจกต์นี้  
 อ่านไฟล์นี้ก่อนเปลี่ยน layout, loading, หน้า list, หรือ API client
 
 ---
 
+## 0) ภาพรวมระบบทั้งชุด
+
+| โฟลเดอร์ | บทบาท |
+|----------|--------|
+| `Personal-website-web` | Landing page สาธารณะ |
+| `Personal-website-admin` | **โปรเจกต์นี้** — CMS จัดการคอนเทนต์ |
+| `Personal-website-api` | Backend API |
+
+### หลักการผลิตภัณฑ์
+
+1. Admin ใช้เขียน/แก้/เปิด-ปิด/จัดลำดับคอนเทนต์ที่จะไปโชว์บน landing
+2. คอนเทนต์หลัก: Home Banners, Skills, Projects, Experiences, Education (+ Admins, Logs)
+3. รองรับ **ไทย + อังกฤษ** ในฟอร์มที่มี `*_th` / `*_en`
+4. `description_*` ใช้ **Rich Text (TipTap)** ส่งเป็น HTML string
+5. Theme: **ขาว + navy** (`--brand-primary: #0b1f3a`)
+6. Responsive: เดสก์ท็อปเป็นหลัก แต่ฟอร์ม/ตารางใช้งานบนจอแคบได้
+
+Admin **ไม่ใช่** landing — อย่าออกแบบเป็น portfolio โชว์ผลงาน
+
+---
+
 ## 1) ภาพรวมโปรเจกต์
 
-- **ชื่อ:** `baan_laundry_admin` (Next.js App Router)
-- **Backend URL:** `NEXT_PUBLIC_BACKEND_URL` ใน `.env.local` (เช่น `http://localhost:3001/laundry/api/`)
-- **Auth:** JWT เก็บใน `localStorage` key `baan_laundry_token` — axios interceptor แนบ `Authorization: Bearer` อัตโนมัติ
-- **Permission UI:** `AdminSessionProvider` โหลด `auth/me` + `admin-menu` เก็บใน memory → sidebar แสดงเฉพาะ tab ที่มี `actions.view` (ไม่เก็บใน localStorage)
+- **ชื่อ:** `personal-website-admin` (Next.js App Router)
+- **basePath:** `/personal-website-admin`
+- **Backend:** `NEXT_PUBLIC_BACKEND_URL` เช่น `http://localhost:3003/personal-website/api/`
+- **Auth:** JWT ใน `localStorage` key `personal_website_admin_token`
+- **Profile key:** `personal_website_admin_admin`
+- **Permission:** `AdminSessionProvider` โหลด `auth/me` + `admin-menu` ใน memory → sidebar ตาม `actions.view`
 
-### คำสั่งที่ใช้บ่อย
+### คำสั่ง
 
 ```bash
 npm run dev
@@ -26,281 +49,145 @@ npm run build
 npm run lint
 ```
 
+Dev URL ตัวอย่าง: `http://localhost:3000/personal-website-admin/login`
+
 ---
 
 ## 2) โครงสร้างโฟลเดอร์
 
 ```
-baan_laundry_admin/
+Personal-website-admin/
 ├── AGENTS.md
-├── .env.local                    # NEXT_PUBLIC_BACKEND_URL
+├── .env.local
 └── app/
-    ├── layout.tsx                # root layout + next-intl
-    ├── globals.css
+    ├── layout.tsx
+    ├── globals.css              # white + navy tokens
     ├── login/page.tsx
     ├── components/
-    │   ├── loading.tsx           # UI Loading (variants)
+    │   ├── RichTextEditor.tsx   # TipTap
+    │   ├── loading.tsx
     │   ├── loginMain.tsx
     │   └── layout/
-    │       ├── AdminShell.tsx    # shell หลัก admin + LoadingProvider
+    │       ├── AdminShell.tsx
     │       ├── LoadingOverlayHost.tsx
-    │       ├── header.tsx
     │       └── sideBar.tsx
     ├── providers/
-    │   ├── LoadingProvider.tsx   # context + route loading
-    │   └── AdminSessionProvider.tsx  # permission_menu + menu_all ใน memory
     ├── hooks/
-    │   └── AuthGuard.tsx
     ├── lib/
-    │   ├── adminStorage.ts       # localStorage keys + helpers
-    │   └── navItems.ts           # TAB_CODE_TO_HREF, icons, labels
+    │   ├── adminStorage.ts
+    │   ├── navItems.ts          # TAB_CODE_TO_HREF
+    │   └── uiTone.ts
     ├── services/
-    │   ├── apiServices.ts        # axios instance + interceptors
-    │   ├── response-validator.ts
-    │   ├── auth/authAPI.ts
-    │   ├── admin/adminAPI.ts
-    │   ├── menu/menuAPI.ts
-    │   ├── user/userAPI.ts
-    │   ├── serviceType/serviceTypeAPI.ts
-    │   ├── listType/listTypeAPI.ts
-    │   ├── listPrice/listPriceAPI.ts
-    │   └── order/orderAPI.ts
-    ├── ui/
-    │   ├── table.tsx             # DataTable ใช้ร่วมทุกหน้า list
-    │   ├── filterPanel.tsx
-    │   └── popUp.tsx             # SweetAlert2 wrappers
+    │   ├── apiServices.ts
+    │   ├── auth|admin|menu|adminLog/
+    │   ├── homeBanner|skill|project|experience|education/
+    ├── ui/                      # DataTable, FilterPanel, popUp, ...
     └── (admin)/
-        ├── layout.tsx            # wrap AdminShell
-        ├── page.tsx              # dashboard
-        ├── admins/components/    # *Main, *Filter, *Table
-        ├── customers/components/
-        ├── service-types/components/
-        ├── list-types/components/
-        ├── list-prices/components/
-        └── ...
+        ├── page.tsx             # overview links
+        ├── home-banners/
+        ├── skills/
+        ├── projects/
+        ├── experiences/
+        ├── education/
+        ├── admins/
+        └── logs/
 ```
+
+### List page pattern (บังคับ)
+
+แต่ละโมดูลคอนเทนต์:
+
+```
+page.tsx
+components/
+  *Main.tsx      # fetch, filter state, toggle, delete, open modal
+  *Filter.tsx
+  *Table.tsx
+  *Action/*FormModal.tsx
+```
+
+Permission: `useTabPermission("<tab-code>")`  
+Tab codes: `home-banners`, `skills`, `projects`, `experiences`, `education`, `admins`, `logs`
+
+ตอนเพิ่ม tab ใหม่: อัปเดต `navItems.ts` + หน้า + API client + เมนูฝั่ง API
 
 ---
 
-## 3) Admin layout shell
+## 3) Admin shell + Loading
 
 ```
 LoadingProvider
-  └── AuthGuard (requireAuth)
-        └── AdminSessionProvider  ← getMe + getMenuAll → memory
-              ├── SideBar          ← dynamic menu จาก permission
-              ├── Header           ← title ตาม pathname + profile + logout
-              └── main (relative)
-                    ├── {children} ← เนื้อหาแต่ละหน้า
-                    └── LoadingOverlayHost  ← overlay loading ทับเฉพาะ main
+  └── AuthGuard
+        └── AdminSessionProvider
+              ├── SideBar
+              └── main
+                    ├── {children}
+                    └── LoadingOverlayHost
 ```
 
-- **`AdminShell`:** `app/components/layout/AdminShell.tsx`
-- **`AuthGuard`:** redirect ไป `/login` ถ้าไม่มี token; ตอนรอใช้ `<Loading variant="fullscreen" />`
-- **`AdminSessionProvider`:** โหลดสิทธิ์เมนูครั้งเข้า admin shell; ถ้า fail → clear session + ไป `/login`
-- **`Header`:** ชื่อหน้าจาก `menuAll` ใน session + โปรไฟล์จาก localStorage
-- **`SideBar`:** อ่าน `permissionMenu` + `menuAll` จาก `useAdminSession()`
+| Loading | ใช้เมื่อ |
+|---------|----------|
+| fullscreen | รอ auth |
+| overlay (`withLoading`) | mutate / เปลี่ยนหน้า |
+| page | โหลดตารางครั้งแรก |
+| login | ปิดปุ่ม submit อย่างเดียว |
 
 ---
 
-## 4) ระบบ Loading (สำคัญ — อ่านก่อนเพิ่ม async UI)
+## 4) Theme / UI
 
-### 4.1 ไฟล์ที่เกี่ยวข้อง
-
-| ไฟล์ | หน้าที่ |
-|------|--------|
-| `app/components/loading.tsx` | UI component หลัก + `LoadingSpinner` |
-| `app/providers/LoadingProvider.tsx` | Context, route loading, `useLoading()` |
-| `app/components/layout/LoadingOverlayHost.tsx` | แสดง overlay เมื่อ `isLoading === true` |
-| `app/components/layout/AdminShell.tsx` | wrap `LoadingProvider` + วาง `LoadingOverlayHost` ใน `<main>` |
-
-### 4.2 Variants ของ `<Loading />`
-
-| variant | ใช้เมื่อ | ตำแหน่ง |
-|---------|----------|---------|
-| `fullscreen` | auth guard | `fixed inset-0 z-[9999]` ทับทั้งจอ |
-| `overlay` | เปลี่ยนหน้า, ลบข้อมูล, logout | `absolute inset-0` ทับเฉพาะ `<main>` (parent ต้อง `relative`) |
-| `page` | โหลดตารางครั้งแรก | ใน `DataTable` แทน spinner เก่า |
-| `inline` | จุดเล็กๆ ในหน้า | default |
-
-```tsx
-import Loading from "@/app/components/loading";
-
-<Loading variant="fullscreen" message="กำลังตรวจสอบสิทธิ์..." />
-<Loading variant="overlay" message="กำลังลบข้อมูล..." />
-<Loading variant="page" message="กำลังโหลดข้อมูลลูกค้า..." />
-```
-
-### 4.3 LoadingProvider — สองแหล่ง loading
-
-1. **Route loading (อัตโนมัติ)**  
-   - ดัก `click` บน `<a href>` ภายใน origin เดียวกัน  
-   - ถ้า pathname เปลี่ยน → แสดง `"กำลังเปลี่ยนหน้า..."`  
-   - ปิดเมื่อ `usePathname()` เปลี่ยน หรือ timeout 10 วินาที  
-
-2. **Manual loading (ref count)**  
-   - `showLoading(message?)` / `hideLoading()` — นับซ้อนได้  
-   - `withLoading(asyncFn, message?)` — เปิดก่อน await ปิดใน `finally`
-
-```tsx
-import { useLoading } from "@/app/providers/LoadingProvider";
-
-const { showLoading, hideLoading, withLoading, isLoading, message } = useLoading();
-
-// แนะนำ: ครอบ async ที่ user รอ
-await withLoading(async () => {
-  const result = await someAPI.delete(id);
-  // handle result...
-}, "กำลังลบข้อมูล...");
-```
-
-**ข้อควรระวัง**
-
-- `useLoading()` ใช้ได้เฉพาะภายใน `LoadingProvider` (อยู่ใน `AdminShell`)
-- หน้า login **ไม่มี** `LoadingProvider` และ **ไม่แสดง** fullscreen loading ตอน submit — ใช้แค่ปุ่ม `disabled` + ข้อความ "กำลังเข้าสู่ระบบ..."
-- อย่า `withLoading` ซ้อนกับ table `loading` ตอน fetch ครั้งแรก (table ใช้ `variant="page"` อยู่แล้ว) — ใช้ overlay สำหรับ action ที่ user กด (ลบ, logout)
-
-### 4.4 จุดที่ใช้ loading อยู่แล้ว
-
-| จังหวะ | วิธีแสดง |
-|--------|----------|
-| กดเมนู sidebar เปลี่ยนหน้า | route loading → overlay |
-| GET list ครั้งแรก | `DataTable` + `loading={true}` → `Loading variant="page"` |
-| Soft delete ใน *Main.tsx | `withLoading(..., "กำลังลบ...")` |
-| Logout | `withLoading` ใน `header.tsx` |
-| Login submit | ปุ่ม disabled + ข้อความ (ไม่มี overlay) |
-| AuthGuard รอ token | `Loading variant="fullscreen"` |
+- CSS variables ใน `globals.css` — ขาวพื้น + navy ปุ่ม/แบรนด์
+- อย่ากลับไปใช้ธีมมืด Nexus / ม่วง / glow
+- SweetAlert ใช้โทนขาว-navy (`app/ui/popUp.tsx`)
+- TipTap styles: `.rich-text-editor`, `.rich-text-toolbar`
 
 ---
 
-## 5) แพทเทิร์นหน้า List (CRUD list)
+## 5) i18n ในฟอร์มคอนเทนต์
 
-แต่ละ entity ใช้โครงเดียวกัน:
-
-```
-(admin)/<route>/
-  page.tsx              → import *Main
-  components/
-    <entity>Main.tsx    → fetch API, filter state, delete handler
-    <entity>Filter.tsx  → search + ล้างตัวกรอง + ปุ่มเพิ่ม
-    <entity>Table.tsx   → columns + DataTable
-```
-
-### Main.tsx
-
-- `useEffect` → เรียก `getXxxAll()` ตอน mount
-- filter client-side ด้วย `useMemo`
-- delete → `popup.confirmDelete` → `withLoading` → `softDeleteXxx` → refresh
-- add admin → เปิด `AdminCreateModal` (multi-step create)
-- edit admin → เปิด `AdminCreateModal` โหมดแก้ไข (`adminId`) โหลด `getAdminByIdPermission`
-
-### Admin Create / Edit Modal
-
-ไฟล์หลัก: `app/(admin)/admins/components/adminAction/`
-- `adminFormModal.tsx` — state + load/save flow
-- `AdminFormSteps.tsx` — UI แต่ละขั้น + ตารางสิทธิ์
-- `adminFormShared.ts` — types / constants / permission helpers
-
-Flow 4 ขั้น (create / edit ใช้ modal เดียวกัน):
-
-1. **เลือกบทบาท** — `owner` | `admin` | `staff`
-2. **ข้อมูลผู้ใช้งาน** — `display_name`, `email`, `password`  
-   - create: รหัสผ่านบังคับ  
-   - edit: รหัสผ่านใหม่ไม่บังคับ (ว่าง = ไม่เปลี่ยน)
-3. **ขอบเขตสิทธิ์** — จาก `menuAPI.getMenuAll()`  
-   - edit: ติ๊กตาม `GET admins/:id/permissions` (`data.menu`)
-   - owner: ติ๊กครบ + disabled (ไม่ส่ง `permissions`)
-4. **ยืนยัน** → `createAdmin` หรือ `updateAdmin` → ปิด modal → `popup.success`
-
-เปิดจาก `adminMain`: `createOpen` (เพิ่ม) หรือ `editingAdminId` (แก้ไข)
-
-### Table.tsx
-
-- คอลัมน์แรกชื่อ **"ลำดับ"** แสดง `index + 1` (ไม่ใช่ DB id)
-- คอลัมน์ actions: ปุ่ม edit/delete
-- ใช้ `DataTable` จาก `app/ui/table.tsx`
-
-### Filter.tsx
-
-- ใช้ `FilterPanel`, `FilterField`, `filterInputClass` จาก `app/ui/filterPanel.tsx`
-- ปุ่ม "ล้างตัวกรอง" + ปุ่มเพิ่ม (สีน้ำเงิน `#2553D8`)
+- Projects / Experiences / Education: ฟิลด์ `name_th`, `name_en`, `description_th`, `description_en`
+- Descriptions → `<RichTextEditor />`
+- Skills / Home Banners: ไม่บังคับคู่ภาษาในชื่อ แต่ media_type + url ต้องถูกต้อง
+- UI ระบบ (ปุ่ม Save, filter) ใช้ภาษาอังกฤษในโค้ดปัจจุบันได้ — ข้อมูลคอนเทนต์ต้องรองรับ 2 ภาษา
 
 ---
 
-## 6) API services (frontend)
+## 6) API client conventions
 
-- Base: `app/services/apiServices.ts` — axios + token interceptor
-- ทุก API file ใช้รูปแบบเดียวกับ `adminAPI.ts`:
-  - inline `headers: { "Content-Type", Accept }`
-  - `.then(validateOrThrowApiResponse)`
-  - `.catch` return `{ status: "failed", errMessage, error }` ข้อความภาษาไทย
-- ตรวจผล: `result.status === "failed" || result.success === false`
+- `apiServices` axios + Bearer interceptor
+- ทุกฟังก์ชัน: `validateOrThrowApiResponse` + `failedResult` รูปแบบ `{ status: "failed", errMessage }`
+- Content endpoints ตรงกับ API:
+  - list / getById / create / update
+  - `PATCH /:id/is-active`
+  - `DELETE /:id` soft
+  - `DELETE /:id/hard` (ถ้า UI เปิดใช้ ต้อง confirm)
 
-### Backend path mapping (relative ต่อ base URL)
-
-| Service file | Path |
-|--------------|------|
-| `userAPI.ts` | `users` |
-| `serviceTypeAPI.ts` | `service-type` |
-| `listTypeAPI.ts` | `list-type` (permission tab: `list-types`) |
-| `listPriceAPI.ts` | `list-price` |
-| `orderAPI.ts` | `orders` (+ PATCH status, payment-status, GET logs) |
+รายละเอียด schema → `../Personal-website-api/AGENTS.md`
 
 ---
 
-## 7) Session storage
+## 7) สิ่งที่ห้าม
 
-### localStorage (persist)
-
-| Key | เนื้อหา |
-|-----|---------|
-| `baan_laundry_token` | JWT |
-| `baan_laundry_admin` | โปรไฟล์ admin |
-
-Helper: `app/lib/adminStorage.ts` — `getAdminToken`, `getStoredAdmin`, `clearAdminSession`  
-`clearAdminSession` ยังลบ legacy keys `baan_laundry_permission_menu` / `baan_laundry_menu_all` ถ้าค้างอยู่
-
-### Memory (`AdminSessionProvider`)
-
-| ข้อมูล | แหล่ง |
-|--------|--------|
-| `permissionMenu` | `GET auth/me` → `data.menu` |
-| `menuAll` | `GET admin-menu` → `data` (labels, tabs, `tabs[].actions`) |
-
-**หมายเหตุ `getMenuAll`:** แต่ละ tab มี `actions: [{ code, name, sort_order }]` จาก `admin_menu_tab_action` — ใช้ตอนตั้งสิทธิ์สร้าง admin
+- อย่าเพิ่มโมดูล infra เก่ากลับมา (VPS, CI/CD, ports, domains, databases)
+- อย่าทำ landing marketing ใน repo นี้
+- อย่าเรียก mutate โดยไม่มี token
+- อย่าซ่อนฟิลด์ภาษาที่สองในฟอร์มที่ต้องแปล
+- อย่า hard delete โดยไม่มี confirmation
+- อย่ารีแฟกเตอร์กว้างเกินงาน
+- อย่า commit / push นอกจากผู้ใช้ขอ
 
 ---
 
-## 8) Navigation / menu
+## 8) เช็กลิสต์ก่อนจบงาน
 
-- `app/lib/navItems.ts` — `TAB_CODE_TO_HREF` map tab code → path  
-  เช่น `"list-types"` → `/list-types`, `"service-types"` → `/service-types`
-- Sidebar ใช้ menu จาก `AdminSessionProvider`; fallback `NAV_ITEMS` ถ้ายังไม่มี menu
-- หลังเพิ่ม tab ใหม่ใน backend ต้อง: migration menu + อัป `TAB_CODE_TO_HREF` + สร้างหน้า admin
-
----
-
-## 9) UI / styling conventions
-
-- Primary blue: `#2553D8`, gradient `#4C7DFF` → `#2553D8`
-- Background admin: `#f4f6fb`
-- Card/table border: `#dbe4ff`
-- Popup: `app/ui/popUp.tsx` — `popup.success`, `popup.error`, `popup.confirmDelete`, `popup.logout`
-- อย่า extract `jsonHeaders` แยกใน API files — ใช้ inline headers ตามไฟล์ที่มีอยู่
+- [ ] ยังเป็น CMS ไม่ใช่ landing
+- [ ] Theme ขาว + navy
+- [ ] ฟอร์มคอนเทนต์ TH/EN ตาม schema
+- [ ] Rich text สำหรับ description ที่ควรมี
+- [ ] Auth + 401/403 ใช้งานได้
+- [ ] `navItems` สอดคล้อง tab ใหม่
+- [ ] `npx tsc --noEmit` / `npm run build` ผ่าน
 
 ---
 
-## 10) Checklist ตอนเพิ่มหน้า admin ใหม่
-
-1. สร้าง `app/services/<entity>/<entity>API.ts` (CRUD ตาม backend)
-2. เพิ่ม route ใน `navItems.ts` (`TAB_CODE_TO_HREF`)
-3. สร้าง `(admin)/<route>/page.tsx` + `components/*Main|Filter|Table`
-4. ตาราง: คอลัมน์ลำดับ = `index + 1`, โหลดด้วย `DataTable loading`
-5. Delete/action ที่รอ: ใช้ `withLoading` จาก `useLoading()`
-6. ถ้า entity ใหม่ใน backend: migration menu + permission tab ด้วย
-
----
-
-## 11) อ้างอิง backend
-
-รายละเอียด API, permission, schema → อ่าน `../baan_laundry_api/AGENTS.md`
+อัปเดตไฟล์นี้เมื่อเปลี่ยนโครงสร้างเมนู, theme, หรือ convention การเชื่อม API

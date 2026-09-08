@@ -1,18 +1,14 @@
 import type { IconType } from "react-icons";
 import {
   MdAdminPanelSettings,
-  MdAnalytics,
-  MdCloud,
   MdDashboard,
   MdFolder,
   MdHistory,
-  MdLanguage,
-  MdSettingsEthernet,
-  MdStorage,
-  MdSync,
+  MdImage,
+  MdSchool,
+  MdStars,
+  MdWork,
 } from "react-icons/md";
-import { GoWorkflow } from "react-icons/go";
-import { FaNetworkWired } from "react-icons/fa";
 
 export type NavItem = {
   href: string;
@@ -22,32 +18,33 @@ export type NavItem = {
 
 export const TAB_CODE_TO_HREF: Record<string, string> = {
   overview: "/",
-  bi: "/bi",
-  vps: "/vps",
-  "ci-cd": "/ci-cd",
-  port: "/port",
-  domain: "/domain",
-  database: "/database",
+  "home-banners": "/home-banners",
+  skills: "/skills",
   projects: "/projects",
+  experiences: "/experiences",
+  education: "/education",
   admins: "/admins",
   logs: "/logs",
 };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: MdDashboard },
+  { href: "/home-banners", label: "Home Banners", icon: MdImage },
+  { href: "/skills", label: "Skills", icon: MdStars },
+  { href: "/projects", label: "Projects", icon: MdFolder },
+  { href: "/experiences", label: "Experiences", icon: MdWork },
+  { href: "/education", label: "Education", icon: MdSchool },
   { href: "/admins", label: "Admins", icon: MdAdminPanelSettings },
   { href: "/logs", label: "Logs", icon: MdHistory },
 ];
 
 const TAB_CODE_TO_ICON: Record<string, IconType> = {
   overview: MdDashboard,
-  bi: MdAnalytics,
-  vps: MdCloud,
-  "ci-cd": GoWorkflow,
-  port: FaNetworkWired,
-  domain: MdLanguage,
-  database: MdStorage,
+  "home-banners": MdImage,
+  skills: MdStars,
   projects: MdFolder,
+  experiences: MdWork,
+  education: MdSchool,
   admins: MdAdminPanelSettings,
   logs: MdHistory,
 };
