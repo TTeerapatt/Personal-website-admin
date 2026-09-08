@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.md
+AGENTS.md
+CLAUDE.md
+npm-debug.log*
+.DS_Store
+.eslintrc*
+eslint.config.*
+tsconfig.tsbuildinfo
