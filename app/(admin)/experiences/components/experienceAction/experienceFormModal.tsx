@@ -1,20 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { FiCheck, FiX } from "react-icons/fi";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FiCheck, FiUpload, FiX } from "react-icons/fi";
 import RichTextEditor from "@/app/components/RichTextEditor";
 import experienceAPI, {
   type CreateExperiencePayload,
   type ExperienceItem,
-  type MediaType,
   type UpdateExperiencePayload,
+  type UploadFileResult,
 } from "@/app/services/experience/experienceAPI";
 import { popup } from "@/app/ui/popUp";
 import { useLoading } from "@/app/providers/LoadingProvider";
-import {
-  filterInputClass,
-  filterSelectClass,
-} from "@/app/ui/filterPanel";
+import { filterInputClass } from "@/app/ui/filterPanel";
 
 type ExperienceFormModalProps = {
   open: boolean;
@@ -31,10 +28,11 @@ type FormState = {
   position: string;
   start_date: string;
   end_date: string;
-  media_type: MediaType | "";
   url: string;
   is_active: boolean;
 };
+
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 const emptyForm = (): FormState => ({
   name_th: "",
@@ -44,12 +42,9 @@ const emptyForm = (): FormState => ({
   position: "",
   start_date: "",
   end_date: "",
-  media_type: "",
   url: "",
   is_active: true,
 });
-
-const MEDIA_OPTIONS: MediaType[] = ["image", "video"];
 
 function toDateInput(value: string | null | undefined): string {
   if (!value) return "";
@@ -61,6 +56,17 @@ function nullableText(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
+function fileNameFromUrl(url: string): string {
+  try {
+    const pathname = new URL(url).pathname;
+    const name = pathname.split("/").filter(Boolean).pop();
+    return name || url;
+  } catch {
+    const name = url.split("/").filter(Boolean).pop();
+    return name || url;
+  }
+}
+
 export default function ExperienceFormModal({
   open,
   itemId = null,
@@ -68,13 +74,22 @@ export default function ExperienceFormModal({
   onSaved,
 }: ExperienceFormModalProps) {
   const { withLoading } = useLoading();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = itemId != null;
   const [form, setForm] = useState(emptyForm);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
 
   const resetState = useCallback(() => {
     setForm(emptyForm());
     setDetailLoading(false);
+    setSelectedFileName("");
+    setLocalPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
   useEffect(() => {
@@ -143,10 +158,10 @@ export default function ExperienceFormModal({
           position: String(item.position || ""),
           start_date: toDateInput(item.start_date),
           end_date: toDateInput(item.end_date),
-          media_type: item.media_type || "",
           url: String(item.url || ""),
           is_active: Boolean(item.is_active),
         });
+        setSelectedFileName(item.url ? fileNameFromUrl(String(item.url)) : "");
       } catch {
         if (!cancelled) {
           await popup.error("Error", "Unable to fetch experience");
@@ -163,6 +178,18 @@ export default function ExperienceFormModal({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, itemId, resetState]);
+
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+    };
+  }, [localPreviewUrl]);
+
+  const previewSrc = useMemo(() => {
+    if (localPreviewUrl) return localPreviewUrl;
+    if (form.url.trim()) return form.url.trim();
+    return null;
+  }, [form.url, localPreviewUrl]);
 
   const handleClose = () => {
     resetState();
@@ -181,12 +208,75 @@ export default function ExperienceFormModal({
     handleClose();
   };
 
+  const handlePickFile = async (file: File | null) => {
+    if (!file) return;
+
+    if (file.size > MAX_FILE_BYTES) {
+      await popup.warning("File too large", "File size must not exceed 5MB");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (!file.type.toLowerCase().startsWith("image/")) {
+      await popup.warning("Invalid file", "Please upload an image file");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    let uploadedUrl = "";
+    await withLoading(async () => {
+      const result = (await experienceAPI.uploadMediaFile(
+        file,
+        "experiences"
+      )) as {
+        success?: boolean;
+        status?: string;
+        data?: UploadFileResult;
+        errMessage?: string;
+        message?: string;
+      };
+
+      if (!result || result.status === "failed" || result.success === false) {
+        await popup.error(
+          "Upload failed",
+          result?.errMessage || result?.message || "Unable to upload file"
+        );
+        return;
+      }
+
+      uploadedUrl = String(result.data?.url || "").trim();
+    }, "Uploading file...");
+
+    if (!uploadedUrl) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setLocalPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setSelectedFileName(file.name);
+    setForm((prev) => ({ ...prev, url: uploadedUrl }));
+  };
+
+  const handleClearFile = () => {
+    setSelectedFileName("");
+    setForm((prev) => ({ ...prev, url: "" }));
+    setLocalPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSave = async () => {
     const name_th = form.name_th.trim();
     const name_en = form.name_en.trim();
     const position = form.position.trim();
     const start_date = form.start_date.trim();
     const end_date = form.end_date.trim();
+    const url = nullableText(form.url);
 
     if (!name_th) {
       await popup.warning("Incomplete information", "Please enter name (TH)");
@@ -220,8 +310,8 @@ export default function ExperienceFormModal({
       position,
       start_date,
       end_date: end_date || null,
-      media_type: form.media_type || null,
-      url: nullableText(form.url),
+      media_type: url ? ("image" as const) : null,
+      url,
       is_active: form.is_active,
     };
 
@@ -293,7 +383,7 @@ export default function ExperienceFormModal({
         onClick={() => void handleRequestClose()}
       />
 
-      <div className="relative z-10 flex max-h-[92vh] w-full max-w-[860px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
+      <div className="relative z-10 flex max-h-[92vh] min-h-[min(560px,92vh)] w-full max-w-[980px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
             {isEdit ? "Edit experience" : "Add experience"}
@@ -301,24 +391,24 @@ export default function ExperienceFormModal({
           <button
             type="button"
             onClick={() => void handleRequestClose()}
-            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] transition hover:bg-[var(--surface-muted)]"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] transition hover:bg-[var(--surface-soft)]"
             aria-label="Close"
           >
             <FiX className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-6 py-8">
           {detailLoading ? (
             <p className="py-16 text-center text-[14px] text-[var(--text-muted)]">
               Loading experience...
             </p>
           ) : (
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mx-auto w-full max-w-[820px] space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Name (TH) *
+                    Name (TH) <span className="text-[var(--danger)]">*</span>
                   </label>
                   <input
                     type="text"
@@ -326,12 +416,13 @@ export default function ExperienceFormModal({
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, name_th: e.target.value }))
                     }
+                    placeholder="Company name (Thai)"
                     className={filterInputClass}
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Name (EN) *
+                    Name (EN) <span className="text-[var(--danger)]">*</span>
                   </label>
                   <input
                     type="text"
@@ -339,6 +430,7 @@ export default function ExperienceFormModal({
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, name_en: e.target.value }))
                     }
+                    placeholder="Company name (English)"
                     className={filterInputClass}
                   />
                 </div>
@@ -346,7 +438,7 @@ export default function ExperienceFormModal({
 
               <div>
                 <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                  Position *
+                  Position <span className="text-[var(--danger)]">*</span>
                 </label>
                 <input
                   type="text"
@@ -354,6 +446,7 @@ export default function ExperienceFormModal({
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, position: e.target.value }))
                   }
+                  placeholder="Job title"
                   className={filterInputClass}
                 />
               </div>
@@ -367,7 +460,8 @@ export default function ExperienceFormModal({
                   onChange={(html) =>
                     setForm((prev) => ({ ...prev, description_th: html }))
                   }
-                  placeholder="Experience description in Thai..."
+                  placeholder="Write the experience description in Thai..."
+                  uploadFolder="experiences"
                 />
               </div>
 
@@ -380,14 +474,15 @@ export default function ExperienceFormModal({
                   onChange={(html) =>
                     setForm((prev) => ({ ...prev, description_en: html }))
                   }
-                  placeholder="Experience description in English..."
+                  placeholder="Write the experience description in English..."
+                  uploadFolder="experiences"
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Start date *
+                    Start date <span className="text-[var(--danger)]">*</span>
                   </label>
                   <input
                     type="date"
@@ -420,67 +515,122 @@ export default function ExperienceFormModal({
                     Leave empty if current
                   </p>
                 </div>
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Media type
-                  </label>
-                  <select
-                    value={form.media_type}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        media_type: e.target.value as MediaType | "",
-                      }))
-                    }
-                    className={filterSelectClass}
-                  >
-                    <option value="">None</option>
-                    {MEDIA_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Media URL
-                  </label>
-                  <input
-                    type="text"
-                    value={form.url}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, url: e.target.value }))
-                    }
-                    className={filterInputClass}
-                  />
-                </div>
               </div>
 
-              <label className="inline-flex cursor-pointer items-center gap-2 text-[14px] font-medium text-[var(--text-primary)]">
+              <div>
+                <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                  Image
+                </label>
                 <input
-                  type="checkbox"
-                  checked={form.is_active}
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
                   onChange={(e) =>
+                    void handlePickFile(e.target.files?.[0] ?? null)
+                  }
+                />
+
+                {previewSrc ? (
+                  <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
+                    <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-semibold text-[var(--text-primary)] shadow-sm transition hover:bg-[var(--surface-soft)]"
+                      >
+                        <FiUpload className="h-3.5 w-3.5" />
+                        Change
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearFile}
+                        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--surface-soft)] hover:text-[var(--danger)]"
+                        aria-label="Remove image"
+                      >
+                        <FiX className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="block w-full cursor-pointer p-4 text-left"
+                      aria-label="Change image"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewSrc}
+                        alt="Experience image preview"
+                        className="mx-auto max-h-[280px] w-full rounded-xl object-contain"
+                      />
+                      <p className="mt-3 truncate text-center text-[12px] text-[var(--text-muted)]">
+                        {selectedFileName || fileNameFromUrl(form.url)}
+                      </p>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)]"
+                  >
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-primary)] shadow-sm">
+                      <FiUpload className="h-5 w-5" />
+                    </span>
+                    <span className="text-[14px] font-semibold text-[var(--text-primary)]">
+                      Click to upload image
+                    </span>
+                    <span className="text-[12px] text-[var(--text-muted)]">
+                      JPG, PNG, WEBP, GIF — max 5MB
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5">
+                <div>
+                  <p className="text-[13px] font-semibold text-[var(--text-primary)]">
+                    Active
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">
+                    Show this experience on the website
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.is_active}
+                  aria-label="Active"
+                  onClick={() =>
                     setForm((prev) => ({
                       ...prev,
-                      is_active: e.target.checked,
+                      is_active: !prev.is_active,
                     }))
                   }
-                  className="h-4 w-4 rounded border-[var(--border)]"
-                />
-                Active
-              </label>
+                  className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full transition ${
+                    form.is_active
+                      ? "bg-[var(--brand-primary)]"
+                      : "bg-[var(--surface-soft)]"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
+                      form.is_active ? "left-[22px]" : "left-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] px-6 py-4">
           <button
             type="button"
             onClick={() => void handleRequestClose()}
             disabled={detailLoading}
-            className="inline-flex h-11 cursor-pointer items-center rounded-xl border border-[var(--border)] px-5 text-[14px] font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-muted)] disabled:opacity-50"
+            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-[14px] font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             Cancel
           </button>

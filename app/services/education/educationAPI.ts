@@ -1,7 +1,7 @@
 import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
-export type MediaType = "image" | "video";
+export type MediaType = "image";
 
 export type EducationItem = {
   id: number;
@@ -44,6 +44,16 @@ export type UpdateEducationPayload = {
 
 export type EducationListParams = {
   is_active?: boolean;
+};
+
+export type UploadFileResult = {
+  url: string;
+  path: string;
+  filename: string;
+  original_name: string;
+  mime_type: string;
+  size: number;
+  max_size: number;
 };
 
 function failedResult(err: unknown, fallback: string) {
@@ -166,6 +176,24 @@ const educationAPI = {
       .catch((err) => {
         console.log("Error hardDeleteEducation:", err);
         return failedResult(err, "Failed to permanently delete Education");
+      });
+  },
+
+  uploadMediaFile(file: File, folder = "education") {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiServices
+      .post(`upload`, formData, {
+        params: { folder },
+        headers: {
+          Accept: "application/json",
+        },
+      })
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error uploadMediaFile:", err);
+        return failedResult(err, "Failed to upload file");
       });
   },
 };
