@@ -9,7 +9,7 @@ import { useLoading } from "@/app/providers/LoadingProvider";
 import { useTabPermission } from "@/app/hooks/useTabPermission";
 import ProjectFormModal from "./projectAction/projectFormModal";
 import ProjectFilter from "./projectFilter";
-import ProjectTable from "./projectTable";
+import ProjectBlog from "./projectBlog";
 
 type ListApiResult =
   | {
@@ -151,7 +151,7 @@ export default function ProjectMain() {
         onAdd={canAdd ? () => setCreateOpen(true) : undefined}
       />
 
-      <ProjectTable
+      <ProjectBlog
         items={filteredItems}
         loading={loading}
         onEdit={canEdit ? (item) => setEditingId(item.id) : undefined}
