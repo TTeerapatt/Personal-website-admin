@@ -144,97 +144,190 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 /* TipTap rich text */
 .rich-text-editor {
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rich-text-editor:focus-within {
+  border-color: color-mix(in srgb, var(--brand-primary) 35%, var(--border));
+  box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.08);
 }
 
 .rich-text-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.55rem;
+  gap: 0.3rem;
+  padding: 0.55rem 0.65rem;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, #faf8f4, #f3f0ea);
+  background: linear-gradient(
+    180deg,
+    var(--surface-muted) 0%,
+    color-mix(in srgb, var(--surface-muted) 70%, white) 100%
+  );
 }
 
 .rich-text-toolbar-sep {
   width: 1px;
-  height: 1.4rem;
-  margin: 0 0.15rem;
+  height: 1.25rem;
+  margin: 0 0.2rem;
   background: var(--border-strong);
+  opacity: 0.7;
 }
 
-.rich-text-toolbar button {
+.rich-text-toolbar > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 2rem;
   height: 2rem;
-  border-radius: 999px;
+  border-radius: 10px;
   border: 1px solid transparent;
   color: var(--text-secondary);
   background: transparent;
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
-.rich-text-toolbar button:hover {
-  background: #fff;
+.rich-text-toolbar > button:hover {
+  background: var(--surface);
   border-color: var(--border);
   color: var(--text-primary);
 }
 
-.rich-text-toolbar button.is-active {
+.rich-text-toolbar > button.is-active {
   background: var(--brand-primary);
   color: #fff;
   border-color: var(--brand-primary);
 }
 
-.rich-text-toolbar button:disabled,
-.rich-text-color select:disabled {
+.rich-text-toolbar > button:disabled,
+.rich-text-color-trigger:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.rich-text-color {
+.rich-text-color-menu {
+  position: relative;
   display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  height: 2rem;
-  padding: 0 0.55rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  font-weight: 700;
 }
 
-.rich-text-color select {
-  border: none;
-  background: transparent;
+.rich-text-color-trigger {
+  display: grid;
+  grid-template-columns: 1rem minmax(3.4rem, auto) auto;
+  column-gap: 0.45rem;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.55rem 0 0.45rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 600;
-  outline: none;
   cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.rich-text-color-trigger:hover:not(:disabled),
+.rich-text-color-trigger.is-open {
+  border-color: color-mix(in srgb, var(--brand-primary) 35%, var(--border));
+  background: var(--surface-muted);
+}
+
+.rich-text-color-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rich-text-color-label {
+  text-align: left;
+  line-height: 1.2;
+}
+
+.rich-text-color-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.rich-text-color-dot.is-default {
+  background:
+    linear-gradient(135deg, transparent 46%, #94a3b8 46%, #94a3b8 54%, transparent 54%),
+    #fff;
+}
+
+.rich-text-color-dropdown {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 20;
+  min-width: 9.5rem;
+  padding: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.rich-text-color-option {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  column-gap: 0.55rem;
+  align-items: center;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0.45rem 0.55rem;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.rich-text-color-option .rich-text-color-dot {
+  justify-self: center;
+}
+
+.rich-text-color-option > span:last-child {
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.rich-text-color-option:hover {
+  background: var(--surface-muted);
+}
+
+.rich-text-color-option.is-active {
+  background: color-mix(in srgb, var(--brand-primary) 10%, white);
 }
 
 .rich-text-editor .ProseMirror {
   min-height: 160px;
-  padding: 0.95rem 1rem;
+  padding: 1rem 1.05rem 1.15rem;
   outline: none;
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: 0.9rem;
 }
 
 .rich-text-editor .ProseMirror p {
   margin: 0 0 0.65rem;
+}
+
+.rich-text-editor .ProseMirror p:last-child {
+  margin-bottom: 0;
 }
 
 .rich-text-editor .ProseMirror h2,
@@ -242,6 +335,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   margin: 0 0 0.65rem;
   font-weight: 700;
   line-height: 1.3;
+  color: var(--brand-primary);
+}
+
+.rich-text-editor .ProseMirror h2 {
+  font-size: 1.15rem;
+}
+
+.rich-text-editor .ProseMirror h3 {
+  font-size: 1.02rem;
 }
 
 .rich-text-editor .ProseMirror ul,
@@ -251,8 +353,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 .rich-text-editor .ProseMirror a {
-  color: var(--brand-accent);
+  color: var(--brand-primary);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .rich-text-editor .ProseMirror img.rich-text-image,
@@ -264,6 +367,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   border-radius: 12px;
 }
 
-.rich-text-editor .ProseMirror:focus {
-  box-shadow: inset 0 0 0 2px rgba(12, 35, 64, 0.08);
+.rich-text-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--text-muted);
 }

@@ -48,11 +48,6 @@ export default function ProjectTable({
         render: (item) => item.name_th,
       },
       {
-        key: "display_order",
-        title: "Order",
-        render: (item) => item.display_order,
-      },
-      {
         key: "is_active",
         title: "Status",
         render: (item) => (

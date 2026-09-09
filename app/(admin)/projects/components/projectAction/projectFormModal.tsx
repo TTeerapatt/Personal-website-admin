@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { FiCheck, FiX } from "react-icons/fi";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FiCheck, FiUpload, FiX } from "react-icons/fi";
 import RichTextEditor from "@/app/components/RichTextEditor";
 import projectAPI, {
   type CreateProjectPayload,
   type ProjectItem,
   type UpdateProjectPayload,
+  type UploadFileResult,
 } from "@/app/services/project/projectAPI";
 import { popup } from "@/app/ui/popUp";
 import { useLoading } from "@/app/providers/LoadingProvider";
@@ -27,9 +28,10 @@ type FormState = {
   thumbnail_url: string;
   github_url: string;
   demo_url: string;
-  display_order: string;
   is_active: boolean;
 };
+
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 const emptyForm = (): FormState => ({
   name_th: "",
@@ -39,13 +41,23 @@ const emptyForm = (): FormState => ({
   thumbnail_url: "",
   github_url: "",
   demo_url: "",
-  display_order: "0",
   is_active: true,
 });
 
 function nullableText(value: string): string | null {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function fileNameFromUrl(url: string): string {
+  try {
+    const pathname = new URL(url).pathname;
+    const name = pathname.split("/").filter(Boolean).pop();
+    return name || url;
+  } catch {
+    const name = url.split("/").filter(Boolean).pop();
+    return name || url;
+  }
 }
 
 export default function ProjectFormModal({
@@ -55,13 +67,22 @@ export default function ProjectFormModal({
   onSaved,
 }: ProjectFormModalProps) {
   const { withLoading } = useLoading();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = itemId != null;
   const [form, setForm] = useState(emptyForm);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
 
   const resetState = useCallback(() => {
     setForm(emptyForm());
     setDetailLoading(false);
+    setSelectedFileName("");
+    setLocalPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
   useEffect(() => {
@@ -128,9 +149,13 @@ export default function ProjectFormModal({
           thumbnail_url: String(item.thumbnail_url || ""),
           github_url: String(item.github_url || ""),
           demo_url: String(item.demo_url || ""),
-          display_order: String(item.display_order ?? 0),
           is_active: Boolean(item.is_active),
         });
+        setSelectedFileName(
+          item.thumbnail_url
+            ? fileNameFromUrl(String(item.thumbnail_url))
+            : ""
+        );
       } catch {
         if (!cancelled) {
           await popup.error("Error", "Unable to fetch project");
@@ -148,15 +173,97 @@ export default function ProjectFormModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, itemId, resetState]);
 
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+    };
+  }, [localPreviewUrl]);
+
+  const previewSrc = useMemo(() => {
+    if (localPreviewUrl) return localPreviewUrl;
+    if (form.thumbnail_url.trim()) return form.thumbnail_url.trim();
+    return null;
+  }, [form.thumbnail_url, localPreviewUrl]);
+
   const handleClose = () => {
     resetState();
     onClose();
   };
 
+  const handleRequestClose = async () => {
+    const confirmed = await popup.confirm({
+      title: "Leave this page?",
+      text: "Unsaved changes will be lost",
+      confirmText: "OK",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
+
+    handleClose();
+  };
+
+  const handlePickFile = async (file: File | null) => {
+    if (!file) return;
+
+    if (file.size > MAX_FILE_BYTES) {
+      await popup.warning("File too large", "File size must not exceed 5MB");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (!file.type.toLowerCase().startsWith("image/")) {
+      await popup.warning("Invalid file", "Please upload an image file");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    let uploadedUrl = "";
+    await withLoading(async () => {
+      const result = (await projectAPI.uploadMediaFile(file, "projects")) as {
+        success?: boolean;
+        status?: string;
+        data?: UploadFileResult;
+        errMessage?: string;
+        message?: string;
+      };
+
+      if (!result || result.status === "failed" || result.success === false) {
+        await popup.error(
+          "Upload failed",
+          result?.errMessage || result?.message || "Unable to upload file"
+        );
+        return;
+      }
+
+      uploadedUrl = String(result.data?.url || "").trim();
+    }, "Uploading file...");
+
+    if (!uploadedUrl) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setLocalPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setSelectedFileName(file.name);
+    setForm((prev) => ({ ...prev, thumbnail_url: uploadedUrl }));
+  };
+
+  const handleClearFile = () => {
+    setSelectedFileName("");
+    setForm((prev) => ({ ...prev, thumbnail_url: "" }));
+    setLocalPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSave = async () => {
     const name_th = form.name_th.trim();
     const name_en = form.name_en.trim();
-    const display_order = Number(form.display_order);
 
     if (!name_th) {
       await popup.warning("Incomplete information", "Please enter name (TH)");
@@ -164,10 +271,6 @@ export default function ProjectFormModal({
     }
     if (!name_en) {
       await popup.warning("Incomplete information", "Please enter name (EN)");
-      return;
-    }
-    if (!Number.isFinite(display_order)) {
-      await popup.warning("Invalid information", "Display order must be a number");
       return;
     }
 
@@ -179,7 +282,6 @@ export default function ProjectFormModal({
       thumbnail_url: nullableText(form.thumbnail_url),
       github_url: nullableText(form.github_url),
       demo_url: nullableText(form.demo_url),
-      display_order,
       is_active: form.is_active,
     };
 
@@ -239,125 +341,180 @@ export default function ProjectFormModal({
         type="button"
         aria-label="Close dialog"
         className="absolute inset-0 bg-[#0f172a]/45"
-        onClick={handleClose}
+        onClick={() => void handleRequestClose()}
       />
 
-      <div className="relative z-10 flex max-h-[92vh] w-full max-w-[860px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
+      <div className="relative z-10 flex max-h-[92vh] min-h-[min(560px,92vh)] w-full max-w-[1040px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
             {isEdit ? "Edit project" : "Add project"}
           </h2>
           <button
             type="button"
-            onClick={handleClose}
-            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] transition hover:bg-[var(--surface-muted)]"
+            onClick={() => void handleRequestClose()}
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] transition hover:bg-[var(--surface-soft)]"
             aria-label="Close"
           >
             <FiX className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-6 py-8">
           {detailLoading ? (
             <p className="py-16 text-center text-[14px] text-[var(--text-muted)]">
               Loading project...
             </p>
           ) : (
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mx-auto w-full max-w-[920px] space-y-7">
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Name (TH) *
+                    Name (TH) <span className="text-[var(--danger)]">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.name_th}
                     onChange={(e) =>
-                      setForm((prev) => ({ ...prev, name_th: e.target.value }))
+                      setForm((prev) => ({
+                        ...prev,
+                        name_th: e.target.value,
+                      }))
                     }
+                    placeholder="Project name (Thai)"
                     className={filterInputClass}
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Name (EN) *
+                    Name (EN) <span className="text-[var(--danger)]">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.name_en}
                     onChange={(e) =>
-                      setForm((prev) => ({ ...prev, name_en: e.target.value }))
+                      setForm((prev) => ({
+                        ...prev,
+                        name_en: e.target.value,
+                      }))
                     }
+                    placeholder="Project name (English)"
                     className={filterInputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (TH)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-th-${itemId ?? "new"}`}
+                    value={form.description_th}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_th: html }))
+                    }
+                    placeholder="Write the project description in Thai..."
+                    minHeight={200}
+                    uploadFolder="projects"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (EN)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-en-${itemId ?? "new"}`}
+                    value={form.description_en}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_en: html }))
+                    }
+                    placeholder="Write the project description in English..."
+                    minHeight={200}
+                    uploadFolder="projects"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                  Description (TH)
+                  Thumbnail
                 </label>
-                <RichTextEditor
-                  value={form.description_th}
-                  onChange={(html) =>
-                    setForm((prev) => ({ ...prev, description_th: html }))
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) =>
+                    void handlePickFile(e.target.files?.[0] ?? null)
                   }
-                  placeholder="Project description in Thai..."
                 />
+
+                {previewSrc ? (
+                  <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
+                    <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-semibold text-[var(--text-primary)] shadow-sm transition hover:bg-[var(--surface-soft)]"
+                      >
+                        <FiUpload className="h-3.5 w-3.5" />
+                        Change
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearFile}
+                        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--surface-soft)] hover:text-[var(--danger)]"
+                        aria-label="Remove thumbnail"
+                      >
+                        <FiX className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="block w-full cursor-pointer p-4 text-left"
+                      aria-label="Change thumbnail"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewSrc}
+                        alt="Project thumbnail preview"
+                        className="mx-auto max-h-[280px] w-full rounded-xl object-contain"
+                      />
+                      <p className="mt-3 truncate text-center text-[12px] text-[var(--text-muted)]">
+                        {selectedFileName ||
+                          fileNameFromUrl(form.thumbnail_url)}
+                      </p>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)]"
+                  >
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-primary)] shadow-sm">
+                      <FiUpload className="h-5 w-5" />
+                    </span>
+                    <span className="text-[14px] font-semibold text-[var(--text-primary)]">
+                      Click to upload image
+                    </span>
+                    <span className="text-[12px] text-[var(--text-muted)]">
+                      JPG, PNG, WEBP, GIF — max 5MB
+                    </span>
+                  </button>
+                )}
               </div>
 
-              <div>
-                <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                  Description (EN)
-                </label>
-                <RichTextEditor
-                  value={form.description_en}
-                  onChange={(html) =>
-                    setForm((prev) => ({ ...prev, description_en: html }))
-                  }
-                  placeholder="Project description in English..."
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Thumbnail URL
-                  </label>
-                  <input
-                    type="text"
-                    value={form.thumbnail_url}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        thumbnail_url: e.target.value,
-                      }))
-                    }
-                    className={filterInputClass}
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Display order
-                  </label>
-                  <input
-                    type="number"
-                    value={form.display_order}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        display_order: e.target.value,
-                      }))
-                    }
-                    className={filterInputClass}
-                  />
-                </div>
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
                     GitHub URL
                   </label>
                   <input
-                    type="text"
+                    type="url"
                     value={form.github_url}
                     onChange={(e) =>
                       setForm((prev) => ({
@@ -365,6 +522,7 @@ export default function ProjectFormModal({
                         github_url: e.target.value,
                       }))
                     }
+                    placeholder="https://github.com/..."
                     className={filterInputClass}
                   />
                 </div>
@@ -373,7 +531,7 @@ export default function ProjectFormModal({
                     Demo URL
                   </label>
                   <input
-                    type="text"
+                    type="url"
                     value={form.demo_url}
                     onChange={(e) =>
                       setForm((prev) => ({
@@ -381,35 +539,55 @@ export default function ProjectFormModal({
                         demo_url: e.target.value,
                       }))
                     }
+                    placeholder="https://..."
                     className={filterInputClass}
                   />
                 </div>
               </div>
 
-              <label className="inline-flex cursor-pointer items-center gap-2 text-[14px] font-medium text-[var(--text-primary)]">
-                <input
-                  type="checkbox"
-                  checked={form.is_active}
-                  onChange={(e) =>
+              <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5">
+                <div>
+                  <p className="text-[13px] font-semibold text-[var(--text-primary)]">
+                    Active
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">
+                    Show this project on the website
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.is_active}
+                  aria-label="Active"
+                  onClick={() =>
                     setForm((prev) => ({
                       ...prev,
-                      is_active: e.target.checked,
+                      is_active: !prev.is_active,
                     }))
                   }
-                  className="h-4 w-4 rounded border-[var(--border)]"
-                />
-                Active
-              </label>
+                  className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full transition ${
+                    form.is_active
+                      ? "bg-[var(--brand-primary)]"
+                      : "bg-[var(--surface-soft)]"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
+                      form.is_active ? "left-[22px]" : "left-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] px-6 py-4">
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => void handleRequestClose()}
             disabled={detailLoading}
-            className="inline-flex h-11 cursor-pointer items-center rounded-xl border border-[var(--border)] px-5 text-[14px] font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-muted)] disabled:opacity-50"
+            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-[14px] font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             Cancel
           </button>

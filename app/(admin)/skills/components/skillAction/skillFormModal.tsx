@@ -165,6 +165,18 @@ export default function SkillFormModal({
     onClose();
   };
 
+  const handleRequestClose = async () => {
+    const confirmed = await popup.confirm({
+      title: "Leave this page?",
+      text: "Unsaved changes will be lost",
+      confirmText: "OK",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
+
+    handleClose();
+  };
+
   const handlePickFile = async (file: File | null) => {
     if (!file) return;
 
@@ -306,7 +318,7 @@ export default function SkillFormModal({
         type="button"
         aria-label="Close dialog"
         className="absolute inset-0 bg-[#0f172a]/45"
-        onClick={handleClose}
+        onClick={() => void handleRequestClose()}
       />
 
       <div className="relative z-10 flex max-h-[92vh] min-h-[min(560px,92vh)] w-full max-w-[980px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
@@ -316,7 +328,7 @@ export default function SkillFormModal({
           </h2>
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => void handleRequestClose()}
             className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] transition hover:bg-[var(--surface-soft)]"
             aria-label="Close"
           >
@@ -461,7 +473,7 @@ export default function SkillFormModal({
         <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] px-6 py-4">
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => void handleRequestClose()}
             disabled={detailLoading}
             className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-[14px] font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)] disabled:opacity-50"
           >

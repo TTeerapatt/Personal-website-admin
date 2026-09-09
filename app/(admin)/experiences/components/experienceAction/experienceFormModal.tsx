@@ -169,6 +169,18 @@ export default function ExperienceFormModal({
     onClose();
   };
 
+  const handleRequestClose = async () => {
+    const confirmed = await popup.confirm({
+      title: "Leave this page?",
+      text: "Unsaved changes will be lost",
+      confirmText: "OK",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
+
+    handleClose();
+  };
+
   const handleSave = async () => {
     const name_th = form.name_th.trim();
     const name_en = form.name_en.trim();
@@ -278,7 +290,7 @@ export default function ExperienceFormModal({
         type="button"
         aria-label="Close dialog"
         className="absolute inset-0 bg-[#0f172a]/45"
-        onClick={handleClose}
+        onClick={() => void handleRequestClose()}
       />
 
       <div className="relative z-10 flex max-h-[92vh] w-full max-w-[860px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
@@ -288,7 +300,7 @@ export default function ExperienceFormModal({
           </h2>
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => void handleRequestClose()}
             className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] transition hover:bg-[var(--surface-muted)]"
             aria-label="Close"
           >
@@ -466,7 +478,7 @@ export default function ExperienceFormModal({
         <div className="flex items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => void handleRequestClose()}
             disabled={detailLoading}
             className="inline-flex h-11 cursor-pointer items-center rounded-xl border border-[var(--border)] px-5 text-[14px] font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-muted)] disabled:opacity-50"
           >

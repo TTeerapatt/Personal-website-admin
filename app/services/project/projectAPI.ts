@@ -24,7 +24,6 @@ export type CreateProjectPayload = {
   thumbnail_url?: string | null;
   github_url?: string | null;
   demo_url?: string | null;
-  display_order?: number;
   is_active?: boolean;
 };
 
@@ -36,8 +35,17 @@ export type UpdateProjectPayload = {
   thumbnail_url?: string | null;
   github_url?: string | null;
   demo_url?: string | null;
-  display_order?: number;
   is_active?: boolean;
+};
+
+export type UploadFileResult = {
+  url: string;
+  path: string;
+  filename: string;
+  original_name: string;
+  mime_type: string;
+  size: number;
+  max_size: number;
 };
 
 export type ProjectListParams = {
@@ -164,6 +172,24 @@ const projectAPI = {
       .catch((err) => {
         console.log("Error hardDeleteProject:", err);
         return failedResult(err, "Failed to permanently delete Project");
+      });
+  },
+
+  uploadMediaFile(file: File, folder = "projects") {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiServices
+      .post(`upload`, formData, {
+        params: { folder },
+        headers: {
+          Accept: "application/json",
+        },
+      })
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error uploadMediaFile:", err);
+        return failedResult(err, "Failed to upload file");
       });
   },
 };
