@@ -29,7 +29,7 @@ export default function TableIconActions({
   if (!showEdit && !showDelete) return null;
 
   return (
-    <div className="inline-flex items-center justify-end gap-1.5">
+    <div className="inline-flex items-center justify-end gap-2">
       {showEdit ? (
         <button
           type="button"

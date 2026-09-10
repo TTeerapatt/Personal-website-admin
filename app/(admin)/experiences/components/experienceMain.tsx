@@ -9,7 +9,7 @@ import { useLoading } from "@/app/providers/LoadingProvider";
 import { useTabPermission } from "@/app/hooks/useTabPermission";
 import ExperienceFormModal from "./experienceAction/experienceFormModal";
 import ExperienceFilter from "./experienceFilter";
-import ExperienceTable from "./experienceTable";
+import ExperienceAccordion from "./experienceAccordion";
 
 type ListApiResult =
   | {
@@ -161,7 +161,7 @@ export default function ExperienceMain() {
         onAdd={canAdd ? () => setCreateOpen(true) : undefined}
       />
 
-      <ExperienceTable
+      <ExperienceAccordion
         items={filteredItems}
         loading={loading}
         onEdit={canEdit ? (item) => setEditingId(item.id) : undefined}

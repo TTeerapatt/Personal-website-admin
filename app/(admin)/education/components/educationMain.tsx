@@ -9,7 +9,7 @@ import { useLoading } from "@/app/providers/LoadingProvider";
 import { useTabPermission } from "@/app/hooks/useTabPermission";
 import EducationFormModal from "./educationAction/educationFormModal";
 import EducationFilter from "./educationFilter";
-import EducationTable from "./educationTable";
+import EducationAccordion from "./educationAccordion";
 
 type ListApiResult =
   | {
@@ -154,7 +154,7 @@ export default function EducationMain() {
         onAdd={canAdd ? () => setCreateOpen(true) : undefined}
       />
 
-      <EducationTable
+      <EducationAccordion
         items={filteredItems}
         loading={loading}
         onEdit={canEdit ? (item) => setEditingId(item.id) : undefined}

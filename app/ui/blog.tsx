@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { FiCalendar, FiImage, FiInbox } from "react-icons/fi";
 import Loading from "@/app/components/loading";
-import { getActiveTone } from "@/app/lib/uiTone";
+import ActiveBadge from "@/app/ui/activeBadge";
 
 export type BlogPost = {
   id: string | number;
@@ -94,14 +94,10 @@ export function BlogCard({
             {item.title}
           </h3>
           {typeof item.isActive === "boolean" ? (
-            <button
-              type="button"
-              disabled={!canToggle}
-              onClick={() => onToggleActive?.(item)}
-              className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold transition ${getActiveTone(item.isActive)} ${canToggle ? "cursor-pointer" : "cursor-default"}`}
-            >
-              {item.isActive ? "Active" : "Inactive"}
-            </button>
+            <ActiveBadge
+              isActive={item.isActive}
+              onToggle={canToggle ? () => onToggleActive?.(item) : undefined}
+            />
           ) : null}
         </div>
 

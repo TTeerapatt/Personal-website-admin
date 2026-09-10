@@ -383,7 +383,7 @@ export default function ExperienceFormModal({
         onClick={() => void handleRequestClose()}
       />
 
-      <div className="relative z-10 flex max-h-[92vh] min-h-[min(560px,92vh)] w-full max-w-[980px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
+      <div className="relative z-10 flex max-h-[92vh] min-h-[min(560px,92vh)] w-full max-w-[1040px] flex-col overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_60px_rgba(15,23,42,0.22)]">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
             {isEdit ? "Edit experience" : "Add experience"}
@@ -404,7 +404,7 @@ export default function ExperienceFormModal({
               Loading experience...
             </p>
           ) : (
-            <div className="mx-auto w-full max-w-[820px] space-y-5">
+            <div className="mx-auto w-full max-w-[920px] space-y-7">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
@@ -451,32 +451,37 @@ export default function ExperienceFormModal({
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                  Description (TH)
-                </label>
-                <RichTextEditor
-                  value={form.description_th}
-                  onChange={(html) =>
-                    setForm((prev) => ({ ...prev, description_th: html }))
-                  }
-                  placeholder="Write the experience description in Thai..."
-                  uploadFolder="experiences"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                  Description (EN)
-                </label>
-                <RichTextEditor
-                  value={form.description_en}
-                  onChange={(html) =>
-                    setForm((prev) => ({ ...prev, description_en: html }))
-                  }
-                  placeholder="Write the experience description in English..."
-                  uploadFolder="experiences"
-                />
+              <div className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (TH)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-th-${itemId ?? "new"}`}
+                    value={form.description_th}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_th: html }))
+                    }
+                    placeholder="Write the experience description in Thai..."
+                    minHeight={200}
+                    uploadFolder="experiences"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (EN)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-en-${itemId ?? "new"}`}
+                    value={form.description_en}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_en: html }))
+                    }
+                    placeholder="Write the experience description in English..."
+                    minHeight={200}
+                    uploadFolder="experiences"
+                  />
+                </div>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">

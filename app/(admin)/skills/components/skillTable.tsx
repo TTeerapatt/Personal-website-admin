@@ -5,6 +5,7 @@ import { FiImage, FiInbox } from "react-icons/fi";
 import { MdDragIndicator } from "react-icons/md";
 import { type SkillItem } from "@/app/services/skill/skillAPI";
 import Loading from "@/app/components/loading";
+import ActiveBadge from "@/app/ui/activeBadge";
 import TableIconActions from "@/app/ui/tableIconActions";
 import {
   ImagePreviewGallery,
@@ -18,6 +19,7 @@ type SkillTableProps = {
   onEdit?: (item: SkillItem) => void;
   onDelete?: (item: SkillItem) => void;
   onReorder?: (orderedItems: SkillItem[]) => void;
+  onToggleActive?: (item: SkillItem) => void;
 };
 
 export default function SkillTable({
@@ -27,9 +29,11 @@ export default function SkillTable({
   onEdit,
   onDelete,
   onReorder,
+  onToggleActive,
 }: SkillTableProps) {
   const canEdit = typeof onEdit === "function";
   const canDelete = typeof onDelete === "function";
+  const canToggle = typeof onToggleActive === "function";
   const reorderEnabled =
     canReorder && typeof onReorder === "function" && items.length > 1;
 
@@ -164,18 +168,30 @@ export default function SkillTable({
                 </p>
               </div>
 
-              {canEdit || canDelete ? (
-                <div className="sm:ml-auto sm:shrink-0">
-                  <TableIconActions
-                    editLabel={`Edit ${item.name}`}
-                    deleteLabel={`Delete ${item.name}`}
-                    showEdit={canEdit}
-                    showDelete={canDelete}
-                    onEdit={() => onEdit?.(item)}
-                    onDelete={() => onDelete?.(item)}
-                  />
-                </div>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-3 sm:ml-auto sm:shrink-0 sm:gap-4">
+                <ActiveBadge
+                  isActive={Boolean(item.is_active)}
+                  onToggle={
+                    canToggle ? () => onToggleActive?.(item) : undefined
+                  }
+                />
+                {canEdit || canDelete ? (
+                  <>
+                    <span
+                      aria-hidden
+                      className="hidden h-6 w-px bg-[var(--border)] sm:block"
+                    />
+                    <TableIconActions
+                      editLabel={`Edit ${item.name}`}
+                      deleteLabel={`Delete ${item.name}`}
+                      showEdit={canEdit}
+                      showDelete={canDelete}
+                      onEdit={() => onEdit?.(item)}
+                      onDelete={() => onDelete?.(item)}
+                    />
+                  </>
+                ) : null}
+              </div>
             </li>
           );
         })}

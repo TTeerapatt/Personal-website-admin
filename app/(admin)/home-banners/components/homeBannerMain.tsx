@@ -138,6 +138,34 @@ export default function HomeBannerMain() {
     await popup.success("Deleted successfully", "Banner deleted successfully");
   };
 
+  const handleToggleActive = async (item: HomeBannerItem) => {
+    let updated = false;
+    await withLoading(async () => {
+      const result = (await homeBannerAPI.patchHomeBannerIsActive(
+        item.id,
+        !item.is_active
+      )) as {
+        success?: boolean;
+        status?: string;
+        errMessage?: string;
+        message?: string;
+      };
+
+      if (!result || result.status === "failed" || result.success === false) {
+        await popup.error(
+          "Update failed",
+          result?.errMessage || result?.message || "Unable to update status"
+        );
+        return;
+      }
+      updated = true;
+    }, "Updating status...");
+
+    if (!updated) return;
+    void fetchItems();
+    await popup.success("Updated", "Status updated successfully");
+  };
+
   const handleReorder = async (visibleOrdered: HomeBannerItem[]) => {
     if (!canEdit) return;
 
@@ -203,6 +231,9 @@ export default function HomeBannerMain() {
         onEdit={canEdit ? (item) => setEditingId(item.id) : undefined}
         onDelete={canDelete ? (item) => void handleDelete(item) : undefined}
         onReorder={canEdit ? (ordered) => void handleReorder(ordered) : undefined}
+        onToggleActive={
+          canEdit ? (item) => void handleToggleActive(item) : undefined
+        }
       />
 
       {canAdd ? (
