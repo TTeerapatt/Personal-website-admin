@@ -39,7 +39,7 @@ export function stripHtml(value: string | null | undefined): string {
 
 export function excerptText(
   value: string | null | undefined,
-  maxLength = 140
+  maxLength = 90
 ): string {
   const plain = stripHtml(value);
   if (plain.length <= maxLength) return plain;
@@ -72,8 +72,8 @@ export function BlogCard({
   const createdLabel = formatBlogDate(item.createdAt);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface)] shadow-sm transition hover:border-[var(--brand-primary)]/25 hover:shadow-md">
-      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--surface-muted)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition hover:border-[var(--brand-primary)]/25 hover:shadow-md">
+      <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-muted)]">
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -83,14 +83,14 @@ export function BlogCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[var(--text-muted)]">
-            <FiImage className="h-8 w-8" />
+            <FiImage className="h-6 w-6" />
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 px-5 py-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="line-clamp-2 text-[17px] font-bold leading-snug text-[var(--text-primary)]">
+      <div className="flex flex-1 flex-col gap-2 px-3.5 py-3.5">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 text-[14px] font-bold leading-snug text-[var(--text-primary)]">
             {item.title}
           </h3>
           {typeof item.isActive === "boolean" ? (
@@ -98,7 +98,7 @@ export function BlogCard({
               type="button"
               disabled={!canToggle}
               onClick={() => onToggleActive?.(item)}
-              className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${getActiveTone(item.isActive)} ${canToggle ? "cursor-pointer" : "cursor-default"}`}
+              className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold transition ${getActiveTone(item.isActive)} ${canToggle ? "cursor-pointer" : "cursor-default"}`}
             >
               {item.isActive ? "Active" : "Inactive"}
             </button>
@@ -106,18 +106,18 @@ export function BlogCard({
         </div>
 
         {description ? (
-          <p className="line-clamp-3 text-[13px] leading-relaxed text-[var(--text-secondary)]">
+          <p className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-secondary)]">
             {description}
           </p>
         ) : (
-          <p className="text-[13px] italic text-[var(--text-muted)]">
+          <p className="text-[12px] italic text-[var(--text-muted)]">
             No description
           </p>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
-          <p className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-muted)]">
-            <FiCalendar className="h-3.5 w-3.5" />
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[var(--border)] pt-2.5">
+          <p className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)]">
+            <FiCalendar className="h-3 w-3" />
             {createdLabel || "—"}
           </p>
           {actions ? <div className="shrink-0">{actions}</div> : null}
@@ -146,9 +146,9 @@ export default function BlogList({
   if (items.length === 0) {
     return (
       <section className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-md">
-        <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 px-6 py-10 text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--surface-muted)] text-[var(--text-primary)]">
-            <FiInbox className="h-6 w-6" />
+        <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-6 py-10 text-center">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--surface-muted)] text-[var(--text-primary)]">
+            <FiInbox className="h-5 w-5" />
           </span>
           <p className="text-[14px] font-medium text-[var(--text-secondary)]">
             {emptyText}
@@ -159,7 +159,7 @@ export default function BlogList({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item) => (
         <BlogCard
           key={item.id}
