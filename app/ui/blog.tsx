@@ -72,14 +72,14 @@ export function BlogCard({
   const createdLabel = formatBlogDate(item.createdAt);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition hover:border-[var(--brand-primary)]/25 hover:shadow-md">
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
       <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-muted)]">
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.imageUrl}
             alt={item.title}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+            className="h-full w-full object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[var(--text-muted)]">

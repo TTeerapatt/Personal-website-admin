@@ -7,6 +7,10 @@ import { type HomeBannerItem } from "@/app/services/homeBanner/homeBannerAPI";
 import Loading from "@/app/components/loading";
 import TableIconActions from "@/app/ui/tableIconActions";
 import { TONE } from "@/app/lib/uiTone";
+import {
+  ImagePreviewGallery,
+  ImagePreviewItem,
+} from "@/app/components/ImagePreview";
 
 type HomeBannerTableProps = {
   items: HomeBannerItem[];
@@ -77,113 +81,114 @@ export default function HomeBannerTable({
   };
 
   return (
-    <ul className="space-y-3">
-      {localItems.map((item) => {
-        const isVideo = String(item.media_type).toLowerCase() === "video";
-        const isDragging = Number(draggingId) === Number(item.id);
-        const isDragOver =
-          Number(dragOverId) === Number(item.id) &&
-          Number(draggingId) !== Number(item.id);
+    <ImagePreviewGallery>
+      <ul className="space-y-3">
+        {localItems.map((item) => {
+          const isVideo = String(item.media_type).toLowerCase() === "video";
+          const isDragging = Number(draggingId) === Number(item.id);
+          const isDragOver =
+            Number(dragOverId) === Number(item.id) &&
+            Number(draggingId) !== Number(item.id);
 
-        return (
-          <li
-            key={item.id}
-            onDragOver={(event) => {
-              if (!reorderEnabled || draggingId == null) return;
-              event.preventDefault();
-              setDragOverId(Number(item.id));
-            }}
-            onDrop={(event) => {
-              if (!reorderEnabled || draggingId == null) return;
-              event.preventDefault();
-              const next = moveItem(Number(draggingId), Number(item.id));
-              setLocalItems(next);
-              setDraggingId(null);
-              setDragOverId(null);
-              onReorder?.(next);
-            }}
-            className={`flex flex-col gap-4 rounded-[20px] border bg-[var(--surface)] px-4 py-4 shadow-md transition sm:flex-row sm:items-center sm:gap-7 sm:px-5 ${
-              isDragging
-                ? "border-[var(--brand-primary)] opacity-60"
-                : isDragOver
-                  ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
-                  : "border-[var(--border)]"
-            }`}
-          >
-            {reorderEnabled ? (
-              <button
-                type="button"
-                draggable
-                onDragStart={(event) => {
-                  setDraggingId(Number(item.id));
-                  event.dataTransfer.effectAllowed = "move";
-                  event.dataTransfer.setData("text/plain", String(item.id));
-                }}
-                onDragEnd={() => {
-                  setDraggingId(null);
-                  setDragOverId(null);
-                }}
-                aria-label={`Reorder ${item.name}`}
-                title="Drag to reorder"
-                className="inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-start text-[var(--text-muted)] transition hover:text-[var(--text-primary)] active:cursor-grabbing sm:self-center"
-              >
-                <MdDragIndicator className="h-5 w-5" />
-              </button>
-            ) : null}
+          return (
+            <li
+              key={item.id}
+              onDragOver={(event) => {
+                if (!reorderEnabled || draggingId == null) return;
+                event.preventDefault();
+                setDragOverId(Number(item.id));
+              }}
+              onDrop={(event) => {
+                if (!reorderEnabled || draggingId == null) return;
+                event.preventDefault();
+                const next = moveItem(Number(draggingId), Number(item.id));
+                setLocalItems(next);
+                setDraggingId(null);
+                setDragOverId(null);
+                onReorder?.(next);
+              }}
+              className={`flex flex-col gap-4 rounded-[20px] border bg-[var(--surface)] px-4 py-4 shadow-md transition sm:flex-row sm:items-center sm:gap-7 sm:px-5 ${
+                isDragging
+                  ? "border-[var(--brand-primary)] opacity-60"
+                  : isDragOver
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
+                    : "border-[var(--border)]"
+              }`}
+            >
+              {reorderEnabled ? (
+                <button
+                  type="button"
+                  draggable
+                  onDragStart={(event) => {
+                    setDraggingId(Number(item.id));
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", String(item.id));
+                  }}
+                  onDragEnd={() => {
+                    setDraggingId(null);
+                    setDragOverId(null);
+                  }}
+                  aria-label={`Reorder ${item.name}`}
+                  title="Drag to reorder"
+                  className="inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-start text-[var(--text-muted)] transition hover:text-[var(--text-primary)] active:cursor-grabbing sm:self-center"
+                >
+                  <MdDragIndicator className="h-5 w-5" />
+                </button>
+              ) : null}
 
-            <div className="flex h-20 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] sm:mr-1 sm:h-16 sm:w-28">
-              {isVideo ? (
-                <video
-                  src={item.url}
-                  muted
-                  playsInline
-                  className="h-full w-full object-contain"
-                />
-              ) : item.url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.url}
-                  alt={item.name}
-                  className="h-full w-full object-contain"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-[var(--text-muted)]">
-                  <FiImage className="h-5 w-5" />
-                </div>
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1 sm:pl-3">
-              <p className="truncate text-[15px] font-semibold text-[var(--text-primary)]">
-                {item.name}
-              </p>
-            </div>
-
-            <div className="sm:w-28 sm:shrink-0">
-              <span
-                className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold capitalize ${
-                  isVideo ? TONE.navy : TONE.brand
-                }`}
-              >
-                {item.media_type}
-              </span>
-            </div>
-
-            {canEdit || canDelete ? (
-              <div className="sm:ml-auto sm:shrink-0">
-                <TableIconActions
-                  editLabel={`Edit ${item.name}`}
-                  deleteLabel={`Delete ${item.name}`}
-                  showEdit={canEdit}
-                  showDelete={canDelete}
-                  onEdit={() => onEdit?.(item)}
-                  onDelete={() => onDelete?.(item)}
-                />
+              <div className="flex h-20 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] sm:mr-1 sm:h-16 sm:w-28">
+                {isVideo ? (
+                  <video
+                    src={item.url}
+                    muted
+                    playsInline
+                    className="h-full w-full object-contain"
+                  />
+                ) : item.url ? (
+                  <ImagePreviewItem
+                    src={item.url}
+                    alt={item.name}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[var(--text-muted)]">
+                    <FiImage className="h-5 w-5" />
+                  </div>
+                )}
               </div>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+
+              <div className="min-w-0 flex-1 sm:pl-3">
+                <p className="truncate text-[15px] font-semibold text-[var(--text-primary)]">
+                  {item.name}
+                </p>
+              </div>
+
+              <div className="sm:w-28 sm:shrink-0">
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-[12px] font-semibold capitalize ${
+                    isVideo ? TONE.navy : TONE.brand
+                  }`}
+                >
+                  {item.media_type}
+                </span>
+              </div>
+
+              {canEdit || canDelete ? (
+                <div className="sm:ml-auto sm:shrink-0">
+                  <TableIconActions
+                    editLabel={`Edit ${item.name}`}
+                    deleteLabel={`Delete ${item.name}`}
+                    showEdit={canEdit}
+                    showDelete={canDelete}
+                    onEdit={() => onEdit?.(item)}
+                    onDelete={() => onDelete?.(item)}
+                  />
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </ImagePreviewGallery>
   );
 }
