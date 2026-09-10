@@ -107,7 +107,7 @@ export default function HomeBannerTable({
                 setDragOverId(null);
                 onReorder?.(next);
               }}
-              className={`flex flex-col gap-4 rounded-[20px] border bg-[var(--surface)] px-4 py-4 shadow-md transition sm:flex-row sm:items-center sm:gap-7 sm:px-5 ${
+              className={`flex flex-col gap-4 rounded-[20px] border bg-[var(--surface)] py-4 pl-4 pr-5 shadow-md transition sm:flex-row sm:items-center sm:gap-7 sm:pl-5 sm:pr-7 ${
                 isDragging
                   ? "border-[var(--brand-primary)] opacity-60"
                   : isDragOver

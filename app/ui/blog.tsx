@@ -116,9 +116,9 @@ export function BlogCard({
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-[var(--border)] pt-2.5">
-          <p className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)]">
-            <FiCalendar className="h-3 w-3" />
-            {createdLabel || "—"}
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-medium leading-none text-[var(--text-muted)]">
+            <FiCalendar className="block h-3 w-3 shrink-0" aria-hidden />
+            <span>{createdLabel || "—"}</span>
           </p>
           {actions ? <div className="shrink-0">{actions}</div> : null}
         </div>
