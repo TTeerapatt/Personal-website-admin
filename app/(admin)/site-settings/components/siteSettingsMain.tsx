@@ -221,7 +221,7 @@ export default function SiteSettingsMain() {
     <div className="space-y-5">
       <FilterPanel>
         <h1 className="text-[18px] font-bold text-[var(--text-primary)]">
-          Site Settings
+          Website Controls Settings
         </h1>
       </FilterPanel>
 
