@@ -16,12 +16,12 @@ pipeline {
     string(
       name: 'NEXT_PUBLIC_BACKEND_URL',
       defaultValue: 'https://trpgls.com/personal-website/api/',
-      description: 'Backend URL used by the browser (baked into Next.js at build time)'
+      description: 'Backend URL ที่ browser เรียก (bake ตอน build Next.js) — production ใช้โดเมน public'
     )
     string(
-      name: 'PERSONAL_WEBSITE_ADMIN_PORT',
-      defaultValue: '3002',
-      description: 'Host port mapped to container (host:container → PORT:3002)'
+      name: 'ADMIN_PORT',
+      defaultValue: '3007',
+      description: 'พอร์ตบน host ที่ map ไป container admin (host:container → ADMIN_PORT:3007)'
     )
   }
 
@@ -29,7 +29,7 @@ pipeline {
     COMPOSE_PROJECT_NAME = 'personal-website-admin'
     IMAGE_NAME = 'personal-website-admin'
     NEXT_PUBLIC_BACKEND_URL = "${params.NEXT_PUBLIC_BACKEND_URL}"
-    PERSONAL_WEBSITE_ADMIN_PORT = "${params.PERSONAL_WEBSITE_ADMIN_PORT}"
+    ADMIN_PORT = "${params.ADMIN_PORT}"
   }
 
   stages {
@@ -44,7 +44,7 @@ pipeline {
         sh '''
           set -e
           export NEXT_PUBLIC_BACKEND_URL="${NEXT_PUBLIC_BACKEND_URL}"
-          export PERSONAL_WEBSITE_ADMIN_PORT="${PERSONAL_WEBSITE_ADMIN_PORT}"
+          export ADMIN_PORT="${ADMIN_PORT}"
           docker compose build personal-website-admin
         '''
       }
@@ -58,7 +58,7 @@ pipeline {
         sh '''
           set -e
           export NEXT_PUBLIC_BACKEND_URL="${NEXT_PUBLIC_BACKEND_URL}"
-          export PERSONAL_WEBSITE_ADMIN_PORT="${PERSONAL_WEBSITE_ADMIN_PORT}"
+          export ADMIN_PORT="${ADMIN_PORT}"
           docker compose up -d --remove-orphans personal-website-admin
         '''
       }
@@ -71,9 +71,9 @@ pipeline {
       steps {
         sh '''
           set -e
-          echo "Waiting for admin on :${PERSONAL_WEBSITE_ADMIN_PORT}/personal-website-admin ..."
+          echo "Waiting for admin on :${ADMIN_PORT}/personal-website/admin ..."
           for i in $(seq 1 30); do
-            code="$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PERSONAL_WEBSITE_ADMIN_PORT}/personal-website-admin" || true)"
+            code="$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${ADMIN_PORT}/personal-website/admin" || true)"
             if echo "$code" | grep -Eq '^[123]'; then
               echo "Admin is healthy (HTTP $code)"
               exit 0
@@ -93,7 +93,7 @@ pipeline {
 
   post {
     success {
-      echo "personal-website-admin #${env.BUILD_NUMBER} succeeded"
+      echo "personal-website-admin #${env.BUILD_NUMBER} succeeded → http://127.0.0.1:${params.ADMIN_PORT}/personal-website/admin"
     }
     failure {
       echo "personal-website-admin #${env.BUILD_NUMBER} failed"

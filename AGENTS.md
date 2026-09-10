@@ -35,8 +35,9 @@ Admin **ไม่ใช่** landing — อย่าออกแบบเป็
 ## 1) ภาพรวมโปรเจกต์
 
 - **ชื่อ:** `personal-website-admin` (Next.js App Router)
-- **basePath:** `/personal-website-admin`
-- **Backend:** `NEXT_PUBLIC_BACKEND_URL` เช่น `http://localhost:3003/personal-website/api/`
+- **basePath:** `/personal-website/admin`
+- **Backend:** `NEXT_PUBLIC_BACKEND_URL` เช่น `http://localhost:3006/personal-website/api/`
+- **พอร์ต Docker/Jenkins:** `3007`
 - **Auth:** JWT ใน `localStorage` key `personal_website_admin_token`
 - **Profile key:** `personal_website_admin_admin`
 - **Permission:** `AdminSessionProvider` โหลด `auth/me` + `admin-menu` ใน memory → sidebar ตาม `actions.view`
@@ -49,7 +50,8 @@ npm run build
 npm run lint
 ```
 
-Dev URL ตัวอย่าง: `http://localhost:3000/personal-website-admin/login`
+Dev URL ตัวอย่าง: `http://localhost:3000/personal-website/admin/login`  
+Docker URL ตัวอย่าง: `http://localhost:3007/personal-website/admin/login`
 
 ---
 

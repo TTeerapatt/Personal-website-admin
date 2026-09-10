@@ -4,14 +4,26 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # The browser reaches the API through the public domain.
-        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-https://trpgls.com/personal-website/api/}
+        # Browser-facing API URL (baked at build time)
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3006/personal-website/api/}
     image: personal-website-admin:latest
     container_name: personal-website-admin
     restart: unless-stopped
     ports:
-      - "${PERSONAL_WEBSITE_ADMIN_PORT:-3002}:3002"
+      - "${ADMIN_PORT:-3007}:3007"
     environment:
       NODE_ENV: production
-      PORT: 3002
+      PORT: 3007
       HOSTNAME: 0.0.0.0
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+(process.env.PORT||3007)+'/personal-website/admin').then((r)=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
