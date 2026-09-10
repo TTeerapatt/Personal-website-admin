@@ -7,6 +7,7 @@ import {
   MdHistory,
   MdImage,
   MdSchool,
+  MdSettings,
   MdStars,
   MdWork,
 } from "react-icons/md";
@@ -14,6 +15,12 @@ import { getStoredAdmin } from "@/app/lib/adminStorage";
 import { useEffect, useState } from "react";
 
 const LINKS = [
+  {
+    href: "/site-settings",
+    title: "Site Settings",
+    desc: "Toggle which landing sections are visible",
+    icon: MdSettings,
+  },
   {
     href: "/home-banners",
     title: "Home Banners",

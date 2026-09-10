@@ -22,7 +22,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### หลักการผลิตภัณฑ์
 
 1. Admin ใช้เขียน/แก้/เปิด-ปิด/จัดลำดับคอนเทนต์ที่จะไปโชว์บน landing
-2. คอนเทนต์หลัก: Home Banners, Skills, Projects, Experiences, Education (+ Admins, Logs)
+2. คอนเทนต์หลัก: Site Settings, Home Banners, Skills, Projects, Experiences, Education (+ Admins, Logs)
 3. รองรับ **ไทย + อังกฤษ** ในฟอร์มที่มี `*_th` / `*_en`
 4. `description_*` ใช้ **Rich Text (TipTap)** ส่งเป็น HTML string
 5. Theme: **ขาว + navy** (`--brand-primary: #0b1f3a`)
@@ -107,9 +107,13 @@ components/
 ```
 
 Permission: `useTabPermission("<tab-code>")`  
-Tab codes: `home-banners`, `skills`, `projects`, `experiences`, `education`, `admins`, `logs`
+Tab codes: `site-settings`, `home-banners`, `skills`, `projects`, `experiences`, `education`, `admins`, `logs`
+
+`site-settings` เป็นหน้า singleton (GET/PUT) — ไม่มี Filter/Table/FormModal; ใช้ `*Main.tsx` เป็นฟอร์มหน้าเดียว
 
 ตอนเพิ่ม tab ใหม่: อัปเดต `navItems.ts` + หน้า + API client + เมนูฝั่ง API
+
+ถ้าเพิ่ม section บนเว็บใหม่: เพิ่มสวิตช์ `show_*` ใน Site Settings (DB/API/ฟอร์ม) คู่กับโมดูลนั้น
 
 ---
 

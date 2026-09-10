@@ -6,6 +6,7 @@ import {
   MdHistory,
   MdImage,
   MdSchool,
+  MdSettings,
   MdStars,
   MdWork,
 } from "react-icons/md";
@@ -18,6 +19,7 @@ export type NavItem = {
 
 export const TAB_CODE_TO_HREF: Record<string, string> = {
   overview: "/",
+  "site-settings": "/site-settings",
   "home-banners": "/home-banners",
   skills: "/skills",
   projects: "/projects",
@@ -29,6 +31,7 @@ export const TAB_CODE_TO_HREF: Record<string, string> = {
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: MdDashboard },
+  { href: "/site-settings", label: "Site Settings", icon: MdSettings },
   { href: "/home-banners", label: "Home Banners", icon: MdImage },
   { href: "/skills", label: "Skills", icon: MdStars },
   { href: "/projects", label: "Projects", icon: MdFolder },
@@ -40,6 +43,7 @@ export const NAV_ITEMS: NavItem[] = [
 
 const TAB_CODE_TO_ICON: Record<string, IconType> = {
   overview: MdDashboard,
+  "site-settings": MdSettings,
   "home-banners": MdImage,
   skills: MdStars,
   projects: MdFolder,
