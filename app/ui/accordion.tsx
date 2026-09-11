@@ -39,6 +39,7 @@ function AccordionRow({
   reorderEnabled,
   isDragging,
   isDragOver,
+  isReorderActive,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -52,6 +53,7 @@ function AccordionRow({
   reorderEnabled: boolean;
   isDragging: boolean;
   isDragOver: boolean;
+  isReorderActive: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
   onDragOver: (event: React.DragEvent) => void;
@@ -66,16 +68,37 @@ function AccordionRow({
     <article
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className={`overflow-hidden rounded-[20px] border bg-[var(--surface)] shadow-sm transition ${
+      aria-grabbed={isDragging || undefined}
+      className={`relative overflow-hidden rounded-[20px] border bg-[var(--surface)] shadow-sm transition duration-200 ${
         isDragging
-          ? "border-[var(--brand-primary)] opacity-60"
+          ? "z-10 scale-[0.985] border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-soft)]/35 opacity-75 shadow-none"
           : isDragOver
-            ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
-            : open
-              ? "border-[var(--brand-primary)]/35 shadow-md"
-              : "border-[var(--border)]"
+            ? "z-[5] border-2 border-[var(--brand-primary)] bg-[var(--brand-soft)]/60 shadow-md ring-2 ring-[var(--brand-primary)]/30"
+            : isReorderActive
+              ? "border-[var(--border)] opacity-50"
+              : open
+                ? "border-[var(--brand-primary)]/35 shadow-md"
+                : "border-[var(--border)]"
       }`}
     >
+      {isDragging ? (
+        <span className="pointer-events-none absolute right-3 top-3 z-10 rounded-lg bg-[var(--brand-primary)] px-2 py-0.5 text-[11px] font-semibold tracking-wide text-white shadow-sm">
+          Moving
+        </span>
+      ) : null}
+
+      {isDragOver ? (
+        <>
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-2 left-0 z-10 w-1.5 rounded-r-full bg-[var(--brand-primary)]"
+          />
+          <span className="pointer-events-none absolute left-1/2 top-2 z-10 -translate-x-1/2 rounded-lg bg-[var(--brand-primary)] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white shadow-sm">
+            Drop here to reorder
+          </span>
+        </>
+      ) : null}
+
       <div className="flex items-stretch gap-3 px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4">
         {reorderEnabled ? (
           <button
@@ -89,7 +112,11 @@ function AccordionRow({
             onDragEnd={onDragEnd}
             aria-label={`Reorder ${item.title}`}
             title="Drag to reorder"
-            className="inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-center text-[var(--text-muted)] transition hover:text-[var(--text-primary)] active:cursor-grabbing"
+            className={`inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-center rounded-lg transition active:cursor-grabbing ${
+              isDragging
+                ? "bg-[var(--brand-primary)] text-white"
+                : "text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]"
+            }`}
           >
             <MdDragIndicator className="h-5 w-5" />
           </button>
@@ -266,8 +293,13 @@ export default function AccordionList({
     );
   }
 
+  const isReorderActive = draggingId != null;
+
   return (
-    <div className="space-y-3">
+    <div
+      className={`space-y-3 ${isReorderActive ? "select-none" : ""}`}
+      aria-dropeffect={isReorderActive ? "move" : undefined}
+    >
       {localItems.map((item) => {
         const open = openIds.some((id) => String(id) === String(item.id));
         const isDragging = String(draggingId) === String(item.id);
@@ -286,6 +318,7 @@ export default function AccordionList({
             reorderEnabled={reorderEnabled}
             isDragging={isDragging}
             isDragOver={isDragOver}
+            isReorderActive={isReorderActive}
             onDragStart={() => {
               draggingIdRef.current = item.id;
               setDraggingId(item.id);
@@ -307,12 +340,17 @@ export default function AccordionList({
               const fromId =
                 event.dataTransfer.getData("text/plain") ||
                 draggingIdRef.current;
-              if (fromId == null || fromId === "") return;
-              const next = moveItem(fromId, item.id);
               draggingIdRef.current = null;
-              setLocalItems(next);
               setDraggingId(null);
               setDragOverId(null);
+              if (fromId == null || fromId === "") return;
+              const next = moveItem(fromId, item.id);
+              const changed = next.some(
+                (entry, index) =>
+                  String(entry.id) !== String(localItems[index]?.id)
+              );
+              if (!changed) return;
+              setLocalItems(next);
               onReorder?.(next);
             }}
           />

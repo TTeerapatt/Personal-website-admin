@@ -83,9 +83,14 @@ export default function SkillTable({
     return next;
   };
 
+  const isReorderActive = draggingId != null;
+
   return (
     <ImagePreviewGallery>
-      <ul className="space-y-3">
+      <ul
+        className={`space-y-3 ${isReorderActive ? "select-none" : ""}`}
+        aria-dropeffect={isReorderActive ? "move" : undefined}
+      >
         {localItems.map((item) => {
           const isDragging = Number(draggingId) === Number(item.id);
           const isDragOver =
@@ -108,22 +113,48 @@ export default function SkillTable({
                   event.dataTransfer.getData("text/plain") ||
                     draggingIdRef.current
                 );
-                if (!Number.isFinite(fromId) || fromId <= 0) return;
-                const next = moveItem(fromId, Number(item.id));
                 draggingIdRef.current = null;
-                setLocalItems(next);
                 setDraggingId(null);
                 setDragOverId(null);
+                if (!Number.isFinite(fromId) || fromId <= 0) return;
+                const next = moveItem(fromId, Number(item.id));
+                const changed = next.some(
+                  (entry, index) =>
+                    Number(entry.id) !== Number(localItems[index]?.id)
+                );
+                if (!changed) return;
+                setLocalItems(next);
                 onReorder?.(next);
               }}
-              className={`flex flex-col gap-4 rounded-[20px] border bg-[var(--surface)] py-4 pl-4 pr-5 shadow-md transition sm:flex-row sm:items-center sm:gap-7 sm:pl-5 sm:pr-7 ${
+              aria-grabbed={isDragging || undefined}
+              className={`relative flex flex-col gap-4 rounded-[20px] border bg-[var(--surface)] py-4 pl-4 pr-5 shadow-md transition duration-200 sm:flex-row sm:items-center sm:gap-7 sm:pl-5 sm:pr-7 ${
                 isDragging
-                  ? "border-[var(--brand-primary)] opacity-60"
+                  ? "z-10 scale-[0.985] border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-soft)]/35 opacity-75 shadow-none"
                   : isDragOver
-                    ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
-                    : "border-[var(--border)]"
+                    ? "z-[5] border-2 border-[var(--brand-primary)] bg-[var(--brand-soft)]/60 shadow-md ring-2 ring-[var(--brand-primary)]/30"
+                    : isReorderActive
+                      ? "border-[var(--border)] opacity-50"
+                      : "border-[var(--border)]"
               }`}
             >
+              {isDragging ? (
+                <span className="pointer-events-none absolute right-3 top-3 z-10 rounded-lg bg-[var(--brand-primary)] px-2 py-0.5 text-[11px] font-semibold tracking-wide text-white shadow-sm">
+                  Moving
+                </span>
+              ) : null}
+
+              {isDragOver ? (
+                <>
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-2 left-0 z-10 w-1.5 rounded-r-full bg-[var(--brand-primary)]"
+                  />
+                  <span className="pointer-events-none absolute left-1/2 top-2 z-10 -translate-x-1/2 rounded-lg bg-[var(--brand-primary)] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white shadow-sm">
+                    Drop here to reorder
+                  </span>
+                </>
+              ) : null}
+
               {reorderEnabled ? (
                 <button
                   type="button"
@@ -142,7 +173,11 @@ export default function SkillTable({
                   }}
                   aria-label={`Reorder ${item.name}`}
                   title="Drag to reorder"
-                  className="inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-start text-[var(--text-muted)] transition hover:text-[var(--text-primary)] active:cursor-grabbing sm:self-center"
+                  className={`inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-start rounded-lg transition active:cursor-grabbing sm:self-center ${
+                    isDragging
+                      ? "bg-[var(--brand-primary)] text-white"
+                      : "text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]"
+                  }`}
                 >
                   <MdDragIndicator className="h-5 w-5" />
                 </button>

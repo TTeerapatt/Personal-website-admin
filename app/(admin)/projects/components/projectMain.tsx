@@ -174,6 +174,14 @@ export default function ProjectMain() {
 
     const previous = items;
     const orderedIds = mergeVisibleOrder(items, visibleOrdered);
+    const previousIds = sortByDisplayOrder(previous).map((item) =>
+      Number(item.id)
+    );
+    const unchanged =
+      orderedIds.length === previousIds.length &&
+      orderedIds.every((id, index) => id === previousIds[index]);
+    if (unchanged) return;
+
     const optimistic = orderedIds
       .map((id, index) => {
         const found = previous.find((item) => Number(item.id) === id);

@@ -68,6 +68,7 @@ export function BlogCard({
   reorderEnabled = false,
   isDragging = false,
   isDragOver = false,
+  isReorderActive = false,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -79,6 +80,7 @@ export function BlogCard({
   reorderEnabled?: boolean;
   isDragging?: boolean;
   isDragOver?: boolean;
+  isReorderActive?: boolean;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   onDragOver?: (event: React.DragEvent) => void;
@@ -92,14 +94,31 @@ export function BlogCard({
     <article
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className={`flex h-full w-full max-w-[310px] flex-col overflow-hidden rounded-2xl border bg-[var(--surface)] shadow-sm transition ${
+      aria-grabbed={isDragging || undefined}
+      className={`relative flex h-full w-full max-w-[310px] flex-col overflow-hidden rounded-2xl border bg-[var(--surface)] shadow-sm transition duration-200 ${
         isDragging
-          ? "border-[var(--brand-primary)] opacity-60"
+          ? "z-10 scale-[0.97] border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-soft)]/35 opacity-75 shadow-none"
           : isDragOver
-            ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
-            : "border-[var(--border)]"
+            ? "z-[5] border-2 border-[var(--brand-primary)] bg-[var(--brand-soft)]/60 shadow-md ring-2 ring-[var(--brand-primary)]/30"
+            : isReorderActive
+              ? "border-[var(--border)] opacity-50"
+              : "border-[var(--border)]"
       }`}
     >
+      {isDragging ? (
+        <span className="pointer-events-none absolute right-2 top-2 z-20 rounded-lg bg-[var(--brand-primary)] px-2 py-0.5 text-[11px] font-semibold tracking-wide text-white shadow-sm">
+          Moving
+        </span>
+      ) : null}
+
+      {isDragOver ? (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[var(--brand-primary)]/20">
+          <span className="rounded-lg bg-[var(--brand-primary)] px-3 py-1.5 text-[12px] font-semibold tracking-wide text-white shadow-sm">
+            Drop here to reorder
+          </span>
+        </div>
+      ) : null}
+
       <div className="relative aspect-[3/2] overflow-hidden bg-[var(--surface-muted)]">
         {reorderEnabled ? (
           <button
@@ -113,7 +132,11 @@ export function BlogCard({
             onDragEnd={onDragEnd}
             aria-label={`Reorder ${item.title}`}
             title="Drag to reorder"
-            className="absolute left-2 top-2 z-10 inline-flex h-8 w-8 cursor-grab items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)]/95 text-[var(--text-muted)] shadow-sm transition hover:text-[var(--text-primary)] active:cursor-grabbing"
+            className={`absolute left-2 top-2 z-10 inline-flex h-8 w-8 cursor-grab items-center justify-center rounded-xl border shadow-sm transition active:cursor-grabbing ${
+              isDragging
+                ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
+                : "border-[var(--border)] bg-[var(--surface)]/95 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            }`}
           >
             <MdDragIndicator className="h-5 w-5" />
           </button>
@@ -228,8 +251,15 @@ export default function BlogList({
     );
   }
 
+  const isReorderActive = draggingId != null;
+
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,310px))] justify-items-start gap-3">
+    <div
+      className={`grid grid-cols-[repeat(auto-fill,minmax(280px,310px))] justify-items-start gap-3 ${
+        isReorderActive ? "select-none" : ""
+      }`}
+      aria-dropeffect={isReorderActive ? "move" : undefined}
+    >
       {localItems.map((item) => {
         const isDragging = String(draggingId) === String(item.id);
         const isDragOver =
@@ -245,6 +275,7 @@ export default function BlogList({
             reorderEnabled={reorderEnabled}
             isDragging={isDragging}
             isDragOver={isDragOver}
+            isReorderActive={isReorderActive}
             onDragStart={() => {
               draggingIdRef.current = item.id;
               setDraggingId(item.id);
@@ -266,12 +297,17 @@ export default function BlogList({
               const fromId =
                 event.dataTransfer.getData("text/plain") ||
                 draggingIdRef.current;
-              if (fromId == null || fromId === "") return;
-              const next = moveItem(fromId, item.id);
               draggingIdRef.current = null;
-              setLocalItems(next);
               setDraggingId(null);
               setDragOverId(null);
+              if (fromId == null || fromId === "") return;
+              const next = moveItem(fromId, item.id);
+              const changed = next.some(
+                (entry, index) =>
+                  String(entry.id) !== String(localItems[index]?.id)
+              );
+              if (!changed) return;
+              setLocalItems(next);
               onReorder?.(next);
             }}
           />
