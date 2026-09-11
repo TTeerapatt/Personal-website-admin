@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { FiCalendar, FiImage, FiInbox } from "react-icons/fi";
+import { MdDragIndicator } from "react-icons/md";
 import Loading from "@/app/components/loading";
 import ActiveBadge from "@/app/ui/activeBadge";
 
@@ -19,6 +20,8 @@ type BlogListProps = {
   loading?: boolean;
   emptyText?: string;
   loadingText?: string;
+  canReorder?: boolean;
+  onReorder?: (orderedItems: BlogPost[]) => void;
   onToggleActive?: (item: BlogPost) => void;
   renderActions?: (item: BlogPost) => ReactNode;
 };
@@ -62,18 +65,60 @@ export function BlogCard({
   item,
   onToggleActive,
   actions,
+  reorderEnabled = false,
+  isDragging = false,
+  isDragOver = false,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
 }: {
   item: BlogPost;
   onToggleActive?: (item: BlogPost) => void;
   actions?: ReactNode;
+  reorderEnabled?: boolean;
+  isDragging?: boolean;
+  isDragOver?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+  onDragOver?: (event: React.DragEvent) => void;
+  onDrop?: (event: React.DragEvent) => void;
 }) {
   const canToggle = typeof onToggleActive === "function";
   const description = excerptText(item.description);
   const createdLabel = formatBlogDate(item.createdAt);
 
   return (
-    <article className="flex h-full w-full max-w-[310px] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+    <article
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className={`flex h-full w-full max-w-[310px] flex-col overflow-hidden rounded-2xl border bg-[var(--surface)] shadow-sm transition ${
+        isDragging
+          ? "border-[var(--brand-primary)] opacity-60"
+          : isDragOver
+            ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
+            : "border-[var(--border)]"
+      }`}
+    >
       <div className="relative aspect-[3/2] overflow-hidden bg-[var(--surface-muted)]">
+        {reorderEnabled ? (
+          <button
+            type="button"
+            draggable
+            onDragStart={(event) => {
+              onDragStart?.();
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", String(item.id));
+            }}
+            onDragEnd={onDragEnd}
+            aria-label={`Reorder ${item.title}`}
+            title="Drag to reorder"
+            className="absolute left-2 top-2 z-10 inline-flex h-8 w-8 cursor-grab items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)]/95 text-[var(--text-muted)] shadow-sm transition hover:text-[var(--text-primary)] active:cursor-grabbing"
+          >
+            <MdDragIndicator className="h-5 w-5" />
+          </button>
+        ) : null}
+
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -128,9 +173,38 @@ export default function BlogList({
   loading = false,
   emptyText = "No posts found",
   loadingText = "Loading...",
+  canReorder = false,
+  onReorder,
   onToggleActive,
   renderActions,
 }: BlogListProps) {
+  const [localItems, setLocalItems] = useState(items);
+  const [draggingId, setDraggingId] = useState<string | number | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | number | null>(null);
+  const draggingIdRef = useRef<string | number | null>(null);
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
+
+  const reorderEnabled =
+    canReorder && typeof onReorder === "function" && localItems.length > 1;
+
+  const moveItem = (fromId: string | number, toId: string | number) => {
+    if (String(fromId) === String(toId)) return localItems;
+    const fromIndex = localItems.findIndex(
+      (item) => String(item.id) === String(fromId)
+    );
+    const toIndex = localItems.findIndex(
+      (item) => String(item.id) === String(toId)
+    );
+    if (fromIndex < 0 || toIndex < 0) return localItems;
+    const next = [...localItems];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    return next;
+  };
+
   if (loading) {
     return (
       <section className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-md">
@@ -139,7 +213,7 @@ export default function BlogList({
     );
   }
 
-  if (items.length === 0) {
+  if (localItems.length === 0) {
     return (
       <section className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-md">
         <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-6 py-10 text-center">
@@ -156,14 +230,53 @@ export default function BlogList({
 
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,310px))] justify-items-start gap-3">
-      {items.map((item) => (
-        <BlogCard
-          key={item.id}
-          item={item}
-          onToggleActive={onToggleActive}
-          actions={renderActions?.(item)}
-        />
-      ))}
+      {localItems.map((item) => {
+        const isDragging = String(draggingId) === String(item.id);
+        const isDragOver =
+          String(dragOverId) === String(item.id) &&
+          String(draggingId) !== String(item.id);
+
+        return (
+          <BlogCard
+            key={item.id}
+            item={item}
+            onToggleActive={onToggleActive}
+            actions={renderActions?.(item)}
+            reorderEnabled={reorderEnabled}
+            isDragging={isDragging}
+            isDragOver={isDragOver}
+            onDragStart={() => {
+              draggingIdRef.current = item.id;
+              setDraggingId(item.id);
+            }}
+            onDragEnd={() => {
+              draggingIdRef.current = null;
+              setDraggingId(null);
+              setDragOverId(null);
+            }}
+            onDragOver={(event) => {
+              if (!reorderEnabled || draggingIdRef.current == null) return;
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+              setDragOverId(item.id);
+            }}
+            onDrop={(event) => {
+              if (!reorderEnabled) return;
+              event.preventDefault();
+              const fromId =
+                event.dataTransfer.getData("text/plain") ||
+                draggingIdRef.current;
+              if (fromId == null || fromId === "") return;
+              const next = moveItem(fromId, item.id);
+              draggingIdRef.current = null;
+              setLocalItems(next);
+              setDraggingId(null);
+              setDragOverId(null);
+              onReorder?.(next);
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

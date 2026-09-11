@@ -7,9 +7,11 @@ import TableIconActions from "@/app/ui/tableIconActions";
 type ProjectBlogProps = {
   items: ProjectItem[];
   loading?: boolean;
+  canReorder?: boolean;
   onEdit?: (item: ProjectItem) => void;
   onDelete?: (item: ProjectItem) => void;
   onToggleActive?: (item: ProjectItem) => void;
+  onReorder?: (orderedItems: ProjectItem[]) => void;
 };
 
 function toBlogPost(item: ProjectItem): BlogPost {
@@ -26,9 +28,11 @@ function toBlogPost(item: ProjectItem): BlogPost {
 export default function ProjectBlog({
   items,
   loading = false,
+  canReorder = false,
   onEdit,
   onDelete,
   onToggleActive,
+  onReorder,
 }: ProjectBlogProps) {
   const canEdit = typeof onEdit === "function";
   const canDelete = typeof onDelete === "function";
@@ -40,6 +44,17 @@ export default function ProjectBlog({
       loading={loading}
       emptyText="No projects found"
       loadingText="Loading projects..."
+      canReorder={canReorder}
+      onReorder={
+        onReorder
+          ? (ordered) => {
+              const next = ordered
+                .map((row) => itemById.get(Number(row.id)))
+                .filter((item): item is ProjectItem => item != null);
+              onReorder(next);
+            }
+          : undefined
+      }
       onToggleActive={
         onToggleActive
           ? (post) => {

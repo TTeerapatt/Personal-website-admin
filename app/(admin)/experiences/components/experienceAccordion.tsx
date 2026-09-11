@@ -10,9 +10,11 @@ import TableIconActions from "@/app/ui/tableIconActions";
 type ExperienceAccordionProps = {
   items: ExperienceItem[];
   loading?: boolean;
+  canReorder?: boolean;
   onEdit?: (item: ExperienceItem) => void;
   onDelete?: (item: ExperienceItem) => void;
   onToggleActive?: (item: ExperienceItem) => void;
+  onReorder?: (orderedItems: ExperienceItem[]) => void;
 };
 
 function formatPeriod(
@@ -29,7 +31,9 @@ function toAccordionItem(item: ExperienceItem): AccordionItemData {
   return {
     id: item.id,
     title: item.name_en || item.name_th,
-    subtitle: item.position || (item.name_th && item.name_en ? item.name_th : null),
+    subtitle:
+      item.position ||
+      (item.name_th && item.name_en ? item.name_th : null),
     description: item.description_en || item.description_th,
     imageUrl: item.url,
     periodLabel: formatPeriod(item.start_date, item.end_date),
@@ -40,9 +44,11 @@ function toAccordionItem(item: ExperienceItem): AccordionItemData {
 export default function ExperienceAccordion({
   items,
   loading = false,
+  canReorder = false,
   onEdit,
   onDelete,
   onToggleActive,
+  onReorder,
 }: ExperienceAccordionProps) {
   const canEdit = typeof onEdit === "function";
   const canDelete = typeof onDelete === "function";
@@ -54,6 +60,17 @@ export default function ExperienceAccordion({
       loading={loading}
       emptyText="No experiences found"
       loadingText="Loading experiences..."
+      canReorder={canReorder}
+      onReorder={
+        onReorder
+          ? (ordered) => {
+              const next = ordered
+                .map((row) => itemById.get(Number(row.id)))
+                .filter((item): item is ExperienceItem => item != null);
+              onReorder(next);
+            }
+          : undefined
+      }
       onToggleActive={
         onToggleActive
           ? (row) => {

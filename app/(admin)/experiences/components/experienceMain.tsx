@@ -22,6 +22,36 @@ type ListApiResult =
   | null
   | undefined;
 
+function sortByDisplayOrder(list: ExperienceItem[]) {
+  return [...list].sort((a, b) => {
+    const aOrder = Number(a.display_order ?? 0);
+    const bOrder = Number(b.display_order ?? 0);
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return Number(a.id) - Number(b.id);
+  });
+}
+
+function mergeVisibleOrder(
+  allItems: ExperienceItem[],
+  visibleOrdered: ExperienceItem[]
+): number[] {
+  const visibleIds = new Set(visibleOrdered.map((item) => Number(item.id)));
+  const queue = visibleOrdered.map((item) => Number(item.id));
+  const merged: number[] = [];
+
+  for (const item of sortByDisplayOrder(allItems)) {
+    const id = Number(item.id);
+    if (visibleIds.has(id)) {
+      const next = queue.shift();
+      if (typeof next === "number") merged.push(next);
+    } else {
+      merged.push(id);
+    }
+  }
+
+  return merged;
+}
+
 export default function ExperienceMain() {
   const { withLoading } = useLoading();
   const { canAdd, canEdit, canDelete } = useTabPermission("experiences");
@@ -48,7 +78,9 @@ export default function ExperienceMain() {
         return;
       }
 
-      setItems(Array.isArray(result.data) ? result.data : []);
+      setItems(
+        sortByDisplayOrder(Array.isArray(result.data) ? result.data : [])
+      );
     } catch {
       await popup.error("Error", "Unable to fetch experiences");
       setItems([]);
@@ -147,6 +179,52 @@ export default function ExperienceMain() {
     );
   };
 
+  const handleReorder = async (visibleOrdered: ExperienceItem[]) => {
+    if (!canEdit) return;
+
+    const previous = items;
+    const orderedIds = mergeVisibleOrder(items, visibleOrdered);
+    const optimistic = orderedIds
+      .map((id, index) => {
+        const found = previous.find((item) => Number(item.id) === id);
+        return found ? { ...found, display_order: index } : null;
+      })
+      .filter((item): item is ExperienceItem => item != null);
+
+    setItems(optimistic);
+
+    let saved = false;
+    await withLoading(async () => {
+      const result = (await experienceAPI.reorderExperiences(orderedIds)) as {
+        success?: boolean;
+        status?: string;
+        data?: ExperienceItem[];
+        errMessage?: string;
+        message?: string;
+      };
+
+      if (!result || result.status === "failed" || result.success === false) {
+        setItems(previous);
+        await popup.error(
+          "Reorder failed",
+          result?.errMessage ||
+            result?.message ||
+            "Unable to reorder experiences"
+        );
+        return;
+      }
+
+      if (Array.isArray(result.data)) {
+        setItems(sortByDisplayOrder(result.data));
+      }
+      saved = true;
+    }, "Updating order...");
+
+    if (saved) {
+      await popup.success("Updated", "Display order updated successfully");
+    }
+  };
+
   return (
     <div className="space-y-5">
       <ExperienceFilter
@@ -164,11 +242,13 @@ export default function ExperienceMain() {
       <ExperienceAccordion
         items={filteredItems}
         loading={loading}
+        canReorder={canEdit}
         onEdit={canEdit ? (item) => setEditingId(item.id) : undefined}
         onDelete={canDelete ? (item) => void handleDelete(item) : undefined}
         onToggleActive={
           canEdit ? (item) => void handleToggleActive(item) : undefined
         }
+        onReorder={canEdit ? (ordered) => void handleReorder(ordered) : undefined}
       />
 
       {canAdd ? (

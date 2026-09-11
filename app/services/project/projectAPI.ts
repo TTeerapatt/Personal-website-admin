@@ -126,6 +126,25 @@ const projectAPI = {
       });
   },
 
+  reorderProjects(ordered_ids: number[]) {
+    return apiServices
+      .put(
+        `projects/reorder`,
+        { ordered_ids },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error reorderProjects:", err);
+        return failedResult(err, "Failed to reorder Projects");
+      });
+  },
+
   patchProjectIsActive(id: string | number, is_active: boolean) {
     return apiServices
       .patch(

@@ -10,9 +10,11 @@ import TableIconActions from "@/app/ui/tableIconActions";
 type EducationAccordionProps = {
   items: EducationItem[];
   loading?: boolean;
+  canReorder?: boolean;
   onEdit?: (item: EducationItem) => void;
   onDelete?: (item: EducationItem) => void;
   onToggleActive?: (item: EducationItem) => void;
+  onReorder?: (orderedItems: EducationItem[]) => void;
 };
 
 function formatPeriod(
@@ -40,9 +42,11 @@ function toAccordionItem(item: EducationItem): AccordionItemData {
 export default function EducationAccordion({
   items,
   loading = false,
+  canReorder = false,
   onEdit,
   onDelete,
   onToggleActive,
+  onReorder,
 }: EducationAccordionProps) {
   const canEdit = typeof onEdit === "function";
   const canDelete = typeof onDelete === "function";
@@ -54,6 +58,17 @@ export default function EducationAccordion({
       loading={loading}
       emptyText="No education found"
       loadingText="Loading education..."
+      canReorder={canReorder}
+      onReorder={
+        onReorder
+          ? (ordered) => {
+              const next = ordered
+                .map((row) => itemById.get(Number(row.id)))
+                .filter((item): item is EducationItem => item != null);
+              onReorder(next);
+            }
+          : undefined
+      }
       onToggleActive={
         onToggleActive
           ? (row) => {

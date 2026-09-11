@@ -14,6 +14,7 @@ export type EducationItem = {
   media_type: MediaType | null;
   url: string | null;
   is_active: boolean;
+  display_order: number;
   created_at: string;
   updated_at: string;
 };
@@ -127,6 +128,25 @@ const educationAPI = {
       .catch((err) => {
         console.log("Error updateEducation:", err);
         return failedResult(err, "Failed to update Education");
+      });
+  },
+
+  reorderEducation(ordered_ids: number[]) {
+    return apiServices
+      .put(
+        `education/reorder`,
+        { ordered_ids },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error reorderEducation:", err);
+        return failedResult(err, "Failed to reorder Education");
       });
   },
 

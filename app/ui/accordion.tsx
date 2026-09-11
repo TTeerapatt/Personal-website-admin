@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useId, type ReactNode } from "react";
 import { FiCalendar, FiChevronDown, FiImage, FiInbox } from "react-icons/fi";
+import { MdDragIndicator } from "react-icons/md";
 import Loading from "@/app/components/loading";
 import ActiveBadge from "@/app/ui/activeBadge";
 import { formatBlogDate, stripHtml } from "@/app/ui/blog";
@@ -23,6 +24,8 @@ type AccordionListProps = {
   loadingText?: string;
   allowMultiple?: boolean;
   defaultOpenId?: string | number | null;
+  canReorder?: boolean;
+  onReorder?: (orderedItems: AccordionItemData[]) => void;
   onToggleActive?: (item: AccordionItemData) => void;
   renderActions?: (item: AccordionItemData) => ReactNode;
 };
@@ -33,12 +36,26 @@ function AccordionRow({
   onToggle,
   onToggleActive,
   actions,
+  reorderEnabled,
+  isDragging,
+  isDragOver,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
 }: {
   item: AccordionItemData;
   open: boolean;
   onToggle: () => void;
   onToggleActive?: (item: AccordionItemData) => void;
   actions?: ReactNode;
+  reorderEnabled: boolean;
+  isDragging: boolean;
+  isDragOver: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDragOver: (event: React.DragEvent) => void;
+  onDrop: (event: React.DragEvent) => void;
 }) {
   const panelId = useId();
   const canToggle = typeof onToggleActive === "function";
@@ -47,13 +64,37 @@ function AccordionRow({
 
   return (
     <article
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       className={`overflow-hidden rounded-[20px] border bg-[var(--surface)] shadow-sm transition ${
-        open
-          ? "border-[var(--brand-primary)]/35 shadow-md"
-          : "border-[var(--border)]"
+        isDragging
+          ? "border-[var(--brand-primary)] opacity-60"
+          : isDragOver
+            ? "border-[var(--brand-primary)] bg-[var(--brand-soft)]/40"
+            : open
+              ? "border-[var(--brand-primary)]/35 shadow-md"
+              : "border-[var(--border)]"
       }`}
     >
       <div className="flex items-stretch gap-3 px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4">
+        {reorderEnabled ? (
+          <button
+            type="button"
+            draggable
+            onDragStart={(event) => {
+              onDragStart();
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", String(item.id));
+            }}
+            onDragEnd={onDragEnd}
+            aria-label={`Reorder ${item.title}`}
+            title="Drag to reorder"
+            className="inline-flex h-8 w-8 shrink-0 cursor-grab items-center justify-center self-center text-[var(--text-muted)] transition hover:text-[var(--text-primary)] active:cursor-grabbing"
+          >
+            <MdDragIndicator className="h-5 w-5" />
+          </button>
+        ) : null}
+
         <button
           type="button"
           onClick={onToggle}
@@ -155,12 +196,25 @@ export default function AccordionList({
   loadingText = "Loading...",
   allowMultiple = false,
   defaultOpenId = null,
+  canReorder = false,
+  onReorder,
   onToggleActive,
   renderActions,
 }: AccordionListProps) {
   const [openIds, setOpenIds] = useState<(string | number)[]>(() =>
     defaultOpenId != null ? [defaultOpenId] : []
   );
+  const [localItems, setLocalItems] = useState(items);
+  const [draggingId, setDraggingId] = useState<string | number | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | number | null>(null);
+  const draggingIdRef = useRef<string | number | null>(null);
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
+
+  const reorderEnabled =
+    canReorder && typeof onReorder === "function" && localItems.length > 1;
 
   const toggle = (id: string | number) => {
     setOpenIds((prev) => {
@@ -174,6 +228,21 @@ export default function AccordionList({
     });
   };
 
+  const moveItem = (fromId: string | number, toId: string | number) => {
+    if (String(fromId) === String(toId)) return localItems;
+    const fromIndex = localItems.findIndex(
+      (item) => String(item.id) === String(fromId)
+    );
+    const toIndex = localItems.findIndex(
+      (item) => String(item.id) === String(toId)
+    );
+    if (fromIndex < 0 || toIndex < 0) return localItems;
+    const next = [...localItems];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    return next;
+  };
+
   if (loading) {
     return (
       <section className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-md">
@@ -182,7 +251,7 @@ export default function AccordionList({
     );
   }
 
-  if (items.length === 0) {
+  if (localItems.length === 0) {
     return (
       <section className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-md">
         <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 px-6 py-10 text-center">
@@ -199,8 +268,13 @@ export default function AccordionList({
 
   return (
     <div className="space-y-3">
-      {items.map((item) => {
+      {localItems.map((item) => {
         const open = openIds.some((id) => String(id) === String(item.id));
+        const isDragging = String(draggingId) === String(item.id);
+        const isDragOver =
+          String(dragOverId) === String(item.id) &&
+          String(draggingId) !== String(item.id);
+
         return (
           <AccordionRow
             key={item.id}
@@ -209,6 +283,38 @@ export default function AccordionList({
             onToggle={() => toggle(item.id)}
             onToggleActive={onToggleActive}
             actions={renderActions?.(item)}
+            reorderEnabled={reorderEnabled}
+            isDragging={isDragging}
+            isDragOver={isDragOver}
+            onDragStart={() => {
+              draggingIdRef.current = item.id;
+              setDraggingId(item.id);
+            }}
+            onDragEnd={() => {
+              draggingIdRef.current = null;
+              setDraggingId(null);
+              setDragOverId(null);
+            }}
+            onDragOver={(event) => {
+              if (!reorderEnabled || draggingIdRef.current == null) return;
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+              setDragOverId(item.id);
+            }}
+            onDrop={(event) => {
+              if (!reorderEnabled) return;
+              event.preventDefault();
+              const fromId =
+                event.dataTransfer.getData("text/plain") ||
+                draggingIdRef.current;
+              if (fromId == null || fromId === "") return;
+              const next = moveItem(fromId, item.id);
+              draggingIdRef.current = null;
+              setLocalItems(next);
+              setDraggingId(null);
+              setDragOverId(null);
+              onReorder?.(next);
+            }}
           />
         );
       })}

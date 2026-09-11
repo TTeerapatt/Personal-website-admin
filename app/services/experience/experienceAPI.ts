@@ -15,6 +15,7 @@ export type ExperienceItem = {
   media_type: MediaType | null;
   url: string | null;
   is_active: boolean;
+  display_order: number;
   created_at: string;
   updated_at: string;
 };
@@ -130,6 +131,25 @@ const experienceAPI = {
       .catch((err) => {
         console.log("Error updateExperience:", err);
         return failedResult(err, "Failed to update Experience");
+      });
+  },
+
+  reorderExperiences(ordered_ids: number[]) {
+    return apiServices
+      .put(
+        `experiences/reorder`,
+        { ordered_ids },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((res) => validateOrThrowApiResponse(res))
+      .catch((err) => {
+        console.log("Error reorderExperiences:", err);
+        return failedResult(err, "Failed to reorder Experiences");
       });
   },
 
