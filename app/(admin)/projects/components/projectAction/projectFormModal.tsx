@@ -403,39 +403,6 @@ export default function ProjectFormModal({
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Description (TH)
-                  </label>
-                  <RichTextEditor
-                    key={`desc-th-${itemId ?? "new"}`}
-                    value={form.description_th}
-                    onChange={(html) =>
-                      setForm((prev) => ({ ...prev, description_th: html }))
-                    }
-                    placeholder="Write the project description in Thai..."
-                    minHeight={200}
-                    uploadFolder="projects"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Description (EN)
-                  </label>
-                  <RichTextEditor
-                    key={`desc-en-${itemId ?? "new"}`}
-                    value={form.description_en}
-                    onChange={(html) =>
-                      setForm((prev) => ({ ...prev, description_en: html }))
-                    }
-                    placeholder="Write the project description in English..."
-                    minHeight={200}
-                    uploadFolder="projects"
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
                   Thumbnail
@@ -506,6 +473,39 @@ export default function ProjectFormModal({
                     </span>
                   </button>
                 )}
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (TH)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-th-${itemId ?? "new"}`}
+                    value={form.description_th}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_th: html }))
+                    }
+                    placeholder="Write the project description in Thai..."
+                    minHeight={200}
+                    uploadFolder="projects"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (EN)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-en-${itemId ?? "new"}`}
+                    value={form.description_en}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_en: html }))
+                    }
+                    placeholder="Write the project description in English..."
+                    minHeight={200}
+                    uploadFolder="projects"
+                  />
+                </div>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">

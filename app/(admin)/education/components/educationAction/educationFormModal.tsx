@@ -423,77 +423,6 @@ export default function EducationFormModal({
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Description (TH)
-                  </label>
-                  <RichTextEditor
-                    key={`desc-th-${itemId ?? "new"}`}
-                    value={form.description_th}
-                    onChange={(html) =>
-                      setForm((prev) => ({ ...prev, description_th: html }))
-                    }
-                    placeholder="Write the education description in Thai..."
-                    minHeight={200}
-                    uploadFolder="education"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Description (EN)
-                  </label>
-                  <RichTextEditor
-                    key={`desc-en-${itemId ?? "new"}`}
-                    value={form.description_en}
-                    onChange={(html) =>
-                      setForm((prev) => ({ ...prev, description_en: html }))
-                    }
-                    placeholder="Write the education description in English..."
-                    minHeight={200}
-                    uploadFolder="education"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    Start date <span className="text-[var(--danger)]">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={form.start_date}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        start_date: e.target.value,
-                      }))
-                    }
-                    className={filterInputClass}
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                    End date
-                  </label>
-                  <input
-                    type="date"
-                    value={form.end_date}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        end_date: e.target.value,
-                      }))
-                    }
-                    className={filterInputClass}
-                  />
-                  <p className="mt-1 text-[12px] text-[var(--text-muted)]">
-                    Leave empty if studying
-                  </p>
-                </div>
-              </div>
-
               <div>
                 <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
                   Image
@@ -563,6 +492,77 @@ export default function EducationFormModal({
                     </span>
                   </button>
                 )}
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (TH)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-th-${itemId ?? "new"}`}
+                    value={form.description_th}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_th: html }))
+                    }
+                    placeholder="Write the education description in Thai..."
+                    minHeight={200}
+                    uploadFolder="education"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Description (EN)
+                  </label>
+                  <RichTextEditor
+                    key={`desc-en-${itemId ?? "new"}`}
+                    value={form.description_en}
+                    onChange={(html) =>
+                      setForm((prev) => ({ ...prev, description_en: html }))
+                    }
+                    placeholder="Write the education description in English..."
+                    minHeight={200}
+                    uploadFolder="education"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    Start date <span className="text-[var(--danger)]">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={form.start_date}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        start_date: e.target.value,
+                      }))
+                    }
+                    className={filterInputClass}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                    End date
+                  </label>
+                  <input
+                    type="date"
+                    value={form.end_date}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        end_date: e.target.value,
+                      }))
+                    }
+                    className={filterInputClass}
+                  />
+                  <p className="mt-1 text-[12px] text-[var(--text-muted)]">
+                    Leave empty if studying
+                  </p>
+                </div>
               </div>
 
               <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5">

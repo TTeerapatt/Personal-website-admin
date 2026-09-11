@@ -438,6 +438,77 @@ export default function ExperienceFormModal({
 
               <div>
                 <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
+                  Image
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) =>
+                    void handlePickFile(e.target.files?.[0] ?? null)
+                  }
+                />
+
+                {previewSrc ? (
+                  <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
+                    <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-semibold text-[var(--text-primary)] shadow-sm transition hover:bg-[var(--surface-soft)]"
+                      >
+                        <FiUpload className="h-3.5 w-3.5" />
+                        Change
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearFile}
+                        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--surface-soft)] hover:text-[var(--danger)]"
+                        aria-label="Remove image"
+                      >
+                        <FiX className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="block w-full cursor-pointer p-4 text-left"
+                      aria-label="Change image"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewSrc}
+                        alt="Experience image preview"
+                        className="mx-auto max-h-[280px] w-full rounded-xl object-contain"
+                      />
+                      <p className="mt-3 truncate text-center text-[12px] text-[var(--text-muted)]">
+                        {selectedFileName || fileNameFromUrl(form.url)}
+                      </p>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)]"
+                  >
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-primary)] shadow-sm">
+                      <FiUpload className="h-5 w-5" />
+                    </span>
+                    <span className="text-[14px] font-semibold text-[var(--text-primary)]">
+                      Click to upload image
+                    </span>
+                    <span className="text-[12px] text-[var(--text-muted)]">
+                      JPG, PNG, WEBP, GIF — max 5MB
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
                   Position <span className="text-[var(--danger)]">*</span>
                 </label>
                 <input
@@ -520,77 +591,6 @@ export default function ExperienceFormModal({
                     Leave empty if current
                   </p>
                 </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-[13px] font-semibold text-[var(--text-primary)]">
-                  Image
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="hidden"
-                  onChange={(e) =>
-                    void handlePickFile(e.target.files?.[0] ?? null)
-                  }
-                />
-
-                {previewSrc ? (
-                  <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
-                    <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-semibold text-[var(--text-primary)] shadow-sm transition hover:bg-[var(--surface-soft)]"
-                      >
-                        <FiUpload className="h-3.5 w-3.5" />
-                        Change
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleClearFile}
-                        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--surface-soft)] hover:text-[var(--danger)]"
-                        aria-label="Remove image"
-                      >
-                        <FiX className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="block w-full cursor-pointer p-4 text-left"
-                      aria-label="Change image"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={previewSrc}
-                        alt="Experience image preview"
-                        className="mx-auto max-h-[280px] w-full rounded-xl object-contain"
-                      />
-                      <p className="mt-3 truncate text-center text-[12px] text-[var(--text-muted)]">
-                        {selectedFileName || fileNameFromUrl(form.url)}
-                      </p>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)]"
-                  >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-primary)] shadow-sm">
-                      <FiUpload className="h-5 w-5" />
-                    </span>
-                    <span className="text-[14px] font-semibold text-[var(--text-primary)]">
-                      Click to upload image
-                    </span>
-                    <span className="text-[12px] text-[var(--text-muted)]">
-                      JPG, PNG, WEBP, GIF — max 5MB
-                    </span>
-                  </button>
-                )}
               </div>
 
               <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5">

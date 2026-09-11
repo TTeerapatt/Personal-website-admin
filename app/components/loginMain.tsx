@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
 import authAPI from "@/app/services/auth/authAPI";
@@ -13,7 +14,7 @@ import {
   type StoredPermissionMenu,
 } from "@/app/lib/adminStorage";
 import { popup } from "@/app/ui/popUp";
-import { MdAdminPanelSettings } from "react-icons/md";
+import { logo } from "@/app/assets";
 
 type LoginApiResult =
   | {
@@ -200,42 +201,39 @@ export default function LoginMain() {
 
   return (
     <div className="flex min-h-screen w-full bg-[var(--surface)]">
-      {/* Left navy panel (~60%) — reserved for branding later */}
+      {/* Left navy panel (~70%) — reserved for branding later */}
       <aside
         aria-hidden
-        className="relative hidden bg-[var(--brand-primary)] lg:block lg:w-[60%]"
+        className="relative hidden bg-[var(--brand-primary)] lg:block lg:w-[70%]"
       />
 
-      {/* Right form panel (~40%) */}
-      <section className="flex w-full flex-col justify-center px-6 py-10 sm:px-10 lg:w-[40%] lg:px-10 xl:px-12">
-        <div className="mx-auto w-full max-w-[360px]">
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--brand-primary)] shadow-md">
-              <MdAdminPanelSettings className="h-6 w-6 text-white" />
+      {/* Right form panel (~30%) */}
+      <section className="flex w-full flex-col justify-center px-6 py-10 sm:px-10 lg:w-[30%] lg:px-8 xl:px-10">
+        <div className="mx-auto w-full max-w-[340px]">
+          <div className="mb-8 flex flex-col items-center text-center">
+            <div className="relative -translate-y-6 h-36 w-36 overflow-hidden rounded-[34px] shadow-[0_14px_32px_rgba(11,31,58,0.2)] ring-1 ring-[rgba(11,31,58,0.08)] sm:-translate-y-8 sm:h-44 sm:w-44 sm:rounded-[40px]">
+              <Image
+                src={logo}
+                alt="Personal Website Admin"
+                fill
+                priority
+                sizes="176px"
+                className="object-cover"
+              />
             </div>
-            <div>
-              <p className="text-[15px] font-bold text-[var(--text-primary)]">
-                Personal Website
-              </p>
-              <p className="text-[12px] text-[var(--text-secondary)]">
-                Admin
-              </p>
-            </div>
-          </div>
 
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-              Admin
+            <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
+              Admin Portal
             </p>
-            <h1 className="mt-2 text-[28px] font-bold leading-tight text-[var(--text-primary)] sm:text-[32px]">
+            <h1 className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-[var(--text-primary)] sm:text-[30px]">
               Welcome back
             </h1>
-            <p className="mt-2 text-[14px] text-[var(--text-secondary)]">
-              Sign in to manage your admin portal
+            <p className="mt-2 max-w-[280px] text-[14px] leading-relaxed text-[var(--text-secondary)]">
+              Sign in to manage your personal website content
             </p>
           </div>
 
-          <form className="mt-9 space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"

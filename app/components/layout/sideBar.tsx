@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { FiLogOut } from "react-icons/fi";
-import { MdAdminPanelSettings } from "react-icons/md";
 import type {
   StoredAdmin,
   StoredMenuLabel,
@@ -22,6 +22,7 @@ import {
 import { popup } from "@/app/ui/popUp";
 import { useLoading } from "@/app/providers/LoadingProvider";
 import { useAdminSession } from "@/app/providers/AdminSessionProvider";
+import { logo } from "@/app/assets";
 
 type GroupedMenu = {
   label: StoredMenuLabel;
@@ -94,8 +95,15 @@ export default function SideBar() {
     <aside className="flex h-screen w-[250px] shrink-0 flex-col overflow-hidden border-r border-[var(--border)] bg-[var(--surface)]">
       <div className="flex h-[76px] shrink-0 items-center border-b border-[var(--border)] px-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[var(--brand-primary)] shadow-[0_6px_14px_rgba(11,31,58,0.18)]">
-            <MdAdminPanelSettings className="h-7 w-7 text-white" />
+          <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-[14px] shadow-[0_6px_14px_rgba(11,31,58,0.18)] ring-1 ring-[rgba(11,31,58,0.08)]">
+            <Image
+              src={logo}
+              alt="Personal Website Admin"
+              fill
+              sizes="44px"
+              className="object-cover"
+              priority
+            />
           </div>
           <div className="min-w-0 leading-tight">
             <p className="text-[15px] font-extrabold tracking-[-0.01em] text-[var(--text-primary)]">

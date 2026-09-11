@@ -1,13 +1,13 @@
 import type { IconType } from "react-icons";
 import {
   MdAdminPanelSettings,
+  MdCode,
   MdDashboard,
   MdFolder,
   MdHistory,
   MdImage,
   MdSchool,
   MdSettings,
-  MdStars,
   MdWork,
 } from "react-icons/md";
 
@@ -33,7 +33,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: MdDashboard },
   { href: "/site-settings", label: "Site Settings", icon: MdSettings },
   { href: "/home-banners", label: "Home Banners", icon: MdImage },
-  { href: "/skills", label: "Skills", icon: MdStars },
+  { href: "/skills", label: "Skills", icon: MdCode },
   { href: "/projects", label: "Projects", icon: MdFolder },
   { href: "/experiences", label: "Experiences", icon: MdWork },
   { href: "/education", label: "Education", icon: MdSchool },
@@ -45,7 +45,7 @@ const TAB_CODE_TO_ICON: Record<string, IconType> = {
   overview: MdDashboard,
   "site-settings": MdSettings,
   "home-banners": MdImage,
-  skills: MdStars,
+  skills: MdCode,
   projects: MdFolder,
   experiences: MdWork,
   education: MdSchool,

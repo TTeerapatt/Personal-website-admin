@@ -53,7 +53,7 @@ export function formatBlogDate(value: string | null | undefined): string {
 
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
-    month: "short",
+    month: "long",
     year: "numeric",
   }).format(date);
 }
@@ -72,8 +72,8 @@ export function BlogCard({
   const createdLabel = formatBlogDate(item.createdAt);
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
-      <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-muted)]">
+    <article className="flex h-full w-full max-w-[310px] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+      <div className="relative aspect-[3/2] overflow-hidden bg-[var(--surface-muted)]">
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -155,7 +155,7 @@ export default function BlogList({
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,310px))] justify-items-start gap-3">
       {items.map((item) => (
         <BlogCard
           key={item.id}
