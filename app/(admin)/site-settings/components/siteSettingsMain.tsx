@@ -19,6 +19,7 @@ type FormState = {
   show_projects: boolean;
   show_experiences: boolean;
   show_education: boolean;
+  show_contact_me: boolean;
 };
 
 type ApiResult =
@@ -39,6 +40,7 @@ const emptyForm = (): FormState => ({
   show_projects: true,
   show_experiences: true,
   show_education: true,
+  show_contact_me: true,
 });
 
 function toForm(data: SiteSettings): FormState {
@@ -49,6 +51,7 @@ function toForm(data: SiteSettings): FormState {
     show_projects: Boolean(data.show_projects),
     show_experiences: Boolean(data.show_experiences),
     show_education: Boolean(data.show_education),
+    show_contact_me: Boolean(data.show_contact_me),
   };
 }
 
@@ -59,7 +62,8 @@ function sameForm(a: FormState, b: FormState) {
     a.show_skills === b.show_skills &&
     a.show_projects === b.show_projects &&
     a.show_experiences === b.show_experiences &&
-    a.show_education === b.show_education
+    a.show_education === b.show_education &&
+    a.show_contact_me === b.show_contact_me
   );
 }
 
@@ -70,6 +74,7 @@ const SECTIONS: { key: keyof FormState; label: string }[] = [
   { key: "show_projects", label: "Projects" },
   { key: "show_experiences", label: "Experiences" },
   { key: "show_education", label: "Education" },
+  { key: "show_contact_me", label: "Contact Me" },
 ];
 
 function ToggleSwitch({
@@ -196,6 +201,7 @@ export default function SiteSettingsMain() {
       show_projects: form.show_projects,
       show_experiences: form.show_experiences,
       show_education: form.show_education,
+      show_contact_me: form.show_contact_me,
     };
 
     await withLoading(async () => {

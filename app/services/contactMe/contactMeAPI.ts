@@ -1,27 +1,31 @@
 import apiServices from "../apiServices";
 import { validateOrThrowApiResponse } from "../response-validator";
 
-export type SiteSettings = {
+export type ContactMe = {
   id: number;
-  show_banners: boolean;
-  show_about_me: boolean;
-  show_skills: boolean;
-  show_projects: boolean;
-  show_experiences: boolean;
-  show_education: boolean;
-  show_contact_me: boolean;
+  name_th: string;
+  name_en: string;
+  phone: string | null;
+  email: string;
+  github_url: string | null;
+  linkedin_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 };
 
-export type UpdateSiteSettingsPayload = {
-  show_banners: boolean;
-  show_about_me: boolean;
-  show_skills: boolean;
-  show_projects: boolean;
-  show_experiences: boolean;
-  show_education: boolean;
-  show_contact_me: boolean;
+export type UpdateContactMePayload = {
+  name_th: string;
+  name_en: string;
+  phone: string | null;
+  email: string;
+  github_url: string | null;
+  linkedin_url: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  is_active: boolean;
 };
 
 function failedResult(err: unknown, fallback: string) {
@@ -36,10 +40,10 @@ function failedResult(err: unknown, fallback: string) {
   };
 }
 
-const siteSettingsAPI = {
-  getSiteSettings() {
+const contactMeAPI = {
+  getContactMe() {
     return apiServices
-      .get(`site-settings`, {
+      .get(`contact-me`, {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -47,14 +51,14 @@ const siteSettingsAPI = {
       })
       .then((res) => validateOrThrowApiResponse(res))
       .catch((err) => {
-        console.log("Error getSiteSettings:", err);
-        return failedResult(err, "Failed to fetch Site Settings");
+        console.log("Error getContactMe:", err);
+        return failedResult(err, "Failed to fetch Contact Me");
       });
   },
 
-  updateSiteSettings(payload: UpdateSiteSettingsPayload) {
+  updateContactMe(payload: UpdateContactMePayload) {
     return apiServices
-      .put(`site-settings`, payload, {
+      .put(`contact-me`, payload, {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -62,10 +66,10 @@ const siteSettingsAPI = {
       })
       .then((res) => validateOrThrowApiResponse(res))
       .catch((err) => {
-        console.log("Error updateSiteSettings:", err);
-        return failedResult(err, "Failed to update Site Settings");
+        console.log("Error updateContactMe:", err);
+        return failedResult(err, "Failed to update Contact Me");
       });
   },
 };
 
-export default siteSettingsAPI;
+export default contactMeAPI;

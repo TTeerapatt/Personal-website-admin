@@ -6,6 +6,7 @@ import {
   MdFolder,
   MdHistory,
   MdImage,
+  MdMail,
   MdPerson,
   MdSchool,
   MdSettings,
@@ -57,6 +58,12 @@ const LINKS = [
     title: "Education",
     desc: "Education timeline",
     icon: MdSchool,
+  },
+  {
+    href: "/contact-me",
+    title: "Contact Me",
+    desc: "Email, phone, and social links",
+    icon: MdMail,
   },
   {
     href: "/admins",

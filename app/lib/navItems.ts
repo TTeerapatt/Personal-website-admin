@@ -6,6 +6,7 @@ import {
   MdFolder,
   MdHistory,
   MdImage,
+  MdMail,
   MdPerson,
   MdSchool,
   MdSettings,
@@ -27,6 +28,7 @@ export const TAB_CODE_TO_HREF: Record<string, string> = {
   projects: "/projects",
   experiences: "/experiences",
   education: "/education",
+  "contact-me": "/contact-me",
   admins: "/admins",
   logs: "/logs",
 };
@@ -40,6 +42,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/projects", label: "Projects", icon: MdFolder },
   { href: "/experiences", label: "Experiences", icon: MdWork },
   { href: "/education", label: "Education", icon: MdSchool },
+  { href: "/contact-me", label: "Contact Me", icon: MdMail },
   { href: "/admins", label: "Admins", icon: MdAdminPanelSettings },
   { href: "/logs", label: "Logs", icon: MdHistory },
 ];
@@ -53,6 +56,7 @@ const TAB_CODE_TO_ICON: Record<string, IconType> = {
   projects: MdFolder,
   experiences: MdWork,
   education: MdSchool,
+  "contact-me": MdMail,
   admins: MdAdminPanelSettings,
   logs: MdHistory,
 };
