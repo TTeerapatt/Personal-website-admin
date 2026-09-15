@@ -6,6 +6,7 @@ import {
   MdFolder,
   MdHistory,
   MdImage,
+  MdPerson,
   MdSchool,
   MdSettings,
   MdStars,
@@ -26,6 +27,12 @@ const LINKS = [
     title: "Home Banners",
     desc: "Manage hero media and banners",
     icon: MdImage,
+  },
+  {
+    href: "/about-me",
+    title: "About Me",
+    desc: "Intro title, animation text, and profile",
+    icon: MdPerson,
   },
   {
     href: "/skills",

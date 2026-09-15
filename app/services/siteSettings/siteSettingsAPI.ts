@@ -4,6 +4,7 @@ import { validateOrThrowApiResponse } from "../response-validator";
 export type SiteSettings = {
   id: number;
   show_banners: boolean;
+  show_about_me: boolean;
   show_skills: boolean;
   show_projects: boolean;
   show_experiences: boolean;
@@ -14,6 +15,7 @@ export type SiteSettings = {
 
 export type UpdateSiteSettingsPayload = {
   show_banners: boolean;
+  show_about_me: boolean;
   show_skills: boolean;
   show_projects: boolean;
   show_experiences: boolean;

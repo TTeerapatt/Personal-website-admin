@@ -14,6 +14,7 @@ import Loading from "@/app/components/loading";
 
 type FormState = {
   show_banners: boolean;
+  show_about_me: boolean;
   show_skills: boolean;
   show_projects: boolean;
   show_experiences: boolean;
@@ -33,6 +34,7 @@ type ApiResult =
 
 const emptyForm = (): FormState => ({
   show_banners: true,
+  show_about_me: true,
   show_skills: true,
   show_projects: true,
   show_experiences: true,
@@ -42,6 +44,7 @@ const emptyForm = (): FormState => ({
 function toForm(data: SiteSettings): FormState {
   return {
     show_banners: Boolean(data.show_banners),
+    show_about_me: Boolean(data.show_about_me),
     show_skills: Boolean(data.show_skills),
     show_projects: Boolean(data.show_projects),
     show_experiences: Boolean(data.show_experiences),
@@ -52,6 +55,7 @@ function toForm(data: SiteSettings): FormState {
 function sameForm(a: FormState, b: FormState) {
   return (
     a.show_banners === b.show_banners &&
+    a.show_about_me === b.show_about_me &&
     a.show_skills === b.show_skills &&
     a.show_projects === b.show_projects &&
     a.show_experiences === b.show_experiences &&
@@ -61,6 +65,7 @@ function sameForm(a: FormState, b: FormState) {
 
 const SECTIONS: { key: keyof FormState; label: string }[] = [
   { key: "show_banners", label: "Home Banners" },
+  { key: "show_about_me", label: "About Me" },
   { key: "show_skills", label: "Skills" },
   { key: "show_projects", label: "Projects" },
   { key: "show_experiences", label: "Experiences" },
@@ -186,6 +191,7 @@ export default function SiteSettingsMain() {
 
     const payload: UpdateSiteSettingsPayload = {
       show_banners: form.show_banners,
+      show_about_me: form.show_about_me,
       show_skills: form.show_skills,
       show_projects: form.show_projects,
       show_experiences: form.show_experiences,
