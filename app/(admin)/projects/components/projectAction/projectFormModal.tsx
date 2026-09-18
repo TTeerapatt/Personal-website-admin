@@ -460,7 +460,7 @@ export default function ProjectFormModal({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)]"
+                    className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-soft)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-muted)]"
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-primary)] shadow-sm">
                       <FiUpload className="h-5 w-5" />

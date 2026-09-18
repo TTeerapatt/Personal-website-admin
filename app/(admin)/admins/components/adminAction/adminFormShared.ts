@@ -79,11 +79,11 @@ export function emptyForm(): AdminFormValues {
 }
 
 const inputBaseClass =
-  "h-11 w-full rounded-xl border bg-[var(--surface)] text-[14px] text-[var(--text-primary)] outline-none transition";
+  "h-11 w-full rounded-xl border text-[14px] text-[var(--text-primary)] outline-none transition disabled:cursor-not-allowed disabled:opacity-65";
 const inputNormalClass =
-  "border-[var(--border-strong)] focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)]/15";
+  "border-solid border-[var(--border-strong)] bg-[var(--surface)] shadow-[inset_3px_0_0_0_var(--brand-primary)] placeholder-shown:border-dashed placeholder-shown:bg-[var(--surface-soft)] placeholder-shown:shadow-none placeholder:text-[var(--text-muted)] focus:border-solid focus:border-[var(--brand-primary)] focus:bg-[var(--surface)] focus:shadow-none focus:ring-2 focus:ring-[var(--brand-primary)]/15";
 const inputErrorClass =
-  "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20";
+  "border-solid border-red-500 bg-[var(--surface)] shadow-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20";
 
 export function getInputClass(hasError: boolean, extra = "") {
   return `${inputBaseClass} ${hasError ? inputErrorClass : inputNormalClass} ${extra}`.trim();

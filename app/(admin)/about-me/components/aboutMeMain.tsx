@@ -373,7 +373,7 @@ export default function AboutMeMain() {
               />
 
               {previewSrc ? (
-                <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
+                <div className="relative overflow-hidden rounded-2xl border border-solid border-[var(--border-strong)] bg-[var(--surface)] shadow-[inset_3px_0_0_0_var(--brand-primary)]">
                   {!fieldsLocked ? (
                     <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
                       <button
@@ -411,7 +411,7 @@ export default function AboutMeMain() {
                   type="button"
                   disabled={fieldsLocked}
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-soft)] px-4 py-10 text-center transition hover:border-[var(--brand-primary)] hover:bg-[var(--surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-primary)] shadow-sm">
                     <FiUpload className="h-5 w-5" />

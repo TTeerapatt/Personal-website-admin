@@ -207,9 +207,14 @@ export default function RichTextEditor({
     TEXT_COLORS.find((color) => color.value === currentColor)?.label ||
     "Default";
   const controlsDisabled = disabled || uploadingImage;
+  const isEmpty = editor.isEmpty;
 
   return (
-    <div className={`rich-text-editor ${disabled ? "opacity-60" : ""}`}>
+    <div
+      className={`rich-text-editor ${isEmpty ? "is-empty" : ""} ${
+        disabled ? "opacity-60" : ""
+      }`}
+    >
       <input
         ref={imageInputRef}
         type="file"
